@@ -1,0 +1,44 @@
+name: Build wheel (no external)
+
+on: [push]
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  cryptography:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkgdata:
+          # [package-name, import-name]
+          - [cryptography, cryptography]
+          - [pyyaml, yaml]
+    name: ${{ matrix.pkgdata[0] }}
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        with:
+          python-version: '3.11'
+
+      - name: Build from sdist
+        run: |
+          # Dependencies may be installed from wheels, the target package from sdist
+          python -m pip install ${{ matrix.pkgdata[0] }} cryptography --no-binary ${{ matrix.pkgdata[0] }} -v
+
+      - name: Import installed package
+        run: |
+          cd .. 
+          python -c "import ${{ matrix.pkgdata[1] }}"
