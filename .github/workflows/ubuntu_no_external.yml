@@ -56,13 +56,20 @@ jobs:
           #- [httptools, greenlet]     # no pyproject.toml in sdist
           #- [markupsafe, markupsafe]  # no pyproject.toml in sdist
           #- [grpcio, grpc]            # no pyproject.toml in sdist
+          #- [sqlalchemy, grpc]            # no pyproject.toml in sdist
+          #- [wrapt, wrapt]            # no pyproject.toml in sdist
+          #- [charset_normalizer, charset_normalizer]  # no pyproject.toml in sdist
           #- [pillow, PIL]
           #- [cffi, cffi]
-          - [frozenlist, frozenlist]
-          - [multidict, multidict]
-          - [coverage, coverage]
-          - [yarl, yarl]
-          - [aiohttp, aiohttp]
+          #- [frozenlist, frozenlist]
+          #- [multidict, multidict]
+          #- [coverage, coverage]
+          #- [yarl, yarl]
+          #- [aiohttp, aiohttp]
+          #- [psutil, psutil]
+          - [numpy, numpy]
+          - [pandas, pandas]
+          #- [scipy, scipy]  # Failing on Fedora because no openblas.pc
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}

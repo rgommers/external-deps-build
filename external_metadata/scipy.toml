@@ -1,0 +1,12 @@
+[external]
+build-requires = [
+  "virtual:compiler/c",
+  "virtual:compiler/cpp",
+  "virtual:compiler/fortran",
+  "pkg:generic/ninja",
+  "pkg:generic/pkg-config",
+]
+host-requires = [
+  "virtual:interface/blas",
+  "virtual:interface/lapack",
+]

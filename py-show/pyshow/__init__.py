@@ -51,6 +51,8 @@ package_mapping['fedora'] = {
     'virtual:compiler/cpp': unidict('gcc-c++'),
     'virtual:compiler/fortran': unidict('gcc-gfortran'),
     'virtual:compiler/rust': unidict(['rust', 'cargo']),
+    'virtual:interface/blas': devel_dict('flexiblas'),
+    'virtual:interface/lapack': devel_dict('flexiblas'),
 }
 
 package_mapping['arch'] = {
@@ -58,6 +60,8 @@ package_mapping['arch'] = {
     'virtual:compiler/cpp': unidict('gcc'),
     'virtual:compiler/fortran': unidict('gcc-gfortran'),
     'virtual:compiler/rust': unidict('rust'),
+    'virtual:interface/blas': devel_dict('openblas'),
+    'virtual:interface/lapack': devel_dict('openblas'),
 }
 
 package_mapping['fedora'].update({
@@ -73,6 +77,8 @@ package_mapping['fedora'].update({
     'pkg:generic/libxslt': devel_dict('libxslt'),
     'pkg:generic/libyaml': devel_dict('libyaml'),
     'pkg:generic/libwebp': devel_dict('libwebp'),
+    'pkg:generic/ninja': unidict('ninja-build'),
+    'pkg:generic/pkg-config': unidict('pkgconfig'),
     'pkg:generic/openjpeg': devel_dict('openjpeg2'),
     'pkg:generic/openssl': devel_dict('openssl'),
     'pkg:generic/tk': devel_dict('tk'),
@@ -91,8 +97,10 @@ package_mapping['arch'].update({
     'pkg:generic/libxslt': unidict('libxslt'),
     'pkg:generic/libyaml': unidict('libyaml'),
     'pkg:generic/libwebp': unidict('libwebp'),
+    'pkg:generic/ninja': unidict('ninja'),
     'pkg:generic/openjpeg': unidict('openjpeg2'),
     'pkg:generic/openssl': unidict('openssl'),
+    'pkg:generic/pkg-config': unidict('pkgconf'),
     'pkg:generic/tk': unidict('tk'),
     'pkg:generic/zlib': unidict('zlib'),
 })
