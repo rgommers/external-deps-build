@@ -1,7 +1,9 @@
 [external]
 build-requires = [
+  "virtual:compiler/c",
   "virtual:compiler/rust",
 ]
 host-requires = [
   "pkg:generic/openssl",
+  "pkg:generic/libffi",
 ]

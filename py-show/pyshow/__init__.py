@@ -21,32 +21,54 @@ package_mgr_install_commands = {
     'pacman': 'sudo pacman -Syu',
 }
 
+# For `rust` virtual package: make that provide `rustc` and `cargo`? Different
+# across distros, e.g. Fedora install only `rustc` for the `rust` package,
+# while Arch installs both of those.
+
+def unidict(deps: str | list[str]) -> dict[str, list[str]]:
+    """Use when build and run dependencies are the same"""
+    if type(deps) == str:
+        deps = [deps]
+    return dict(build=deps, run=deps)
+
+
+def devel_dict(deps: str | list[str]) -> dict[str, list[str]]:
+    """Use when build equals run dependencies plus headers in `run-devel` packages"""
+    if type(deps) == str:
+        deps = [deps]
+
+    build_deps = deps.copy()
+    build_deps.extend([s+'-devel' for s in deps])
+    return dict(run=deps, build=build_deps)
+
+
 # For external dependencies; for Python/PyPI ones we will make use of existing
 # metadata files that distros already have.
 package_mapping = {}
 package_mapping['fedora'] = {
-    'virtual:compiler/c': 'gcc',
-    'virtual:compiler/cpp': 'gcc-c++',
-    'virtual:compiler/fortran': 'gcc-gfortran',
-    'virtual:compiler/rust': 'rust',
+    'virtual:compiler/c': unidict('gcc'),
+    'virtual:compiler/cpp': unidict('gcc-c++'),
+    'virtual:compiler/fortran': unidict('gcc-gfortran'),
+    'virtual:compiler/rust': unidict(['rust', 'cargo']),
 }
 
 package_mapping['arch'] = {
-    'virtual:compiler/c': 'gcc',
-    'virtual:compiler/cpp': 'gcc',
-    'virtual:compiler/fortran': 'gcc-gfortran',
-    'virtual:compiler/rust': 'rust',
+    'virtual:compiler/c': unidict('gcc'),
+    'virtual:compiler/cpp': unidict('gcc'),
+    'virtual:compiler/fortran': unidict('gcc-gfortran'),
+    'virtual:compiler/rust': unidict('rust'),
 }
 
 package_mapping['fedora'].update({
-    'pkg:generic/openssl': 'openssl',
+    'pkg:generic/libffi': devel_dict('libffi'),
+    'pkg:generic/libyaml': devel_dict('libyaml'),
+    'pkg:generic/openssl': devel_dict('openssl'),
 })
 package_mapping['arch'].update({
-    'pkg:generic/openssl': 'openssl',
+    'pkg:generic/libffi': unidict('libffi'),
+    'pkg:generic/libyaml': unidict('libyaml'),
+    'pkg:generic/openssl': unidict('openssl'),
 })
-
-
-# TODO: deal with -devel & co for build/host-requires
 
 
 def read_pyproject(fname_sdist='./sdist/amended_sdist.tar.gz'):
@@ -71,6 +93,7 @@ def get_distro():
             return name
 
     warnings.warn(f'No support for distro {distro.id()} yet!')
+    # FIXME
     return 'fedora'
 
 
@@ -87,13 +110,17 @@ def print_toml_key(key, table):
 
 
 def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
-    external_deps = []
+    external_build_deps = []
+    external_run_deps = []
     toml = read_pyproject()
     if 'external' in toml:
         external = toml['external']
         for key in ('build-requires', 'host-requires', 'dependencies'):
             if key in external:
-                external_deps.extend(external[key])
+                if 'requires' in key:
+                    external_build_deps.extend(external[key])
+                else:
+                    external_run_deps.extend(external[key])
                 if show:
                     print_toml_key(key, external)
 
@@ -107,15 +134,22 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
         distro_name = get_distro()
         _mapping = package_mapping[distro_name]
         _mapped_deps = []
-        for dep in external_deps:
+        for dep in external_build_deps:
             try:
-                _mapped_deps.append(_mapping[dep])
+                _mapped_deps.extend(_mapping[dep]['build'])
             except KeyError:
                 raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
         
+        for dep in external_run_deps:
+            try:
+                _mapped_deps.extend(_mapping[dep]['run'])
+            except KeyError:
+                raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
         return _mapped_deps
     else:
-        return external_deps
+        all_deps = external_build_deps.copy()
+        all_deps.extend(external_run_deps)
+        return
 
 
 def main(package_name: str,

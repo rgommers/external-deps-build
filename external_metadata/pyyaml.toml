@@ -1,4 +1,5 @@
 [external]
 build-requires = [
   "virtual:compiler/c",
+  "pkg:generic/libyaml",
 ]
