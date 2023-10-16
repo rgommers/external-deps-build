@@ -6,9 +6,6 @@ defaults:
   run:
     shell: bash
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-
 permissions:
   contents: read # to fetch code (actions/checkout)
 
@@ -45,6 +42,7 @@ jobs:
 
   with_external_metadata:
     strategy:
+      fail-fast: false
       matrix:
         platform:
           # [container image name, display-name]
@@ -65,8 +63,17 @@ jobs:
 
       - name: Download and patch sdist
         run: |
-          python -m pip install pypi_json
+          python -m pip install pypi_json distro typer rich
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+
+      - name: Install external dependencies
+        run: |
+          name=${{ matrix.pkgdata[0]}}
+          shopt -s expand_aliases
+          alias py-show="python py-show/pyshow/__init__.py"  # not a package yet
+          py-show --external $name
+          py-show --external --system-install-cmd $name
+          $(py-show --external --system-install-cmd $name)
 
       - name: Build from sdist
         run: |
