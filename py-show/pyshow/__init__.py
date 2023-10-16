@@ -61,21 +61,39 @@ package_mapping['arch'] = {
 }
 
 package_mapping['fedora'].update({
+    'pkg:generic/freetype': devel_dict('freetype'),
+    'pkg:generic/lcms2': devel_dict('lcms2'),
     'pkg:generic/libffi': devel_dict('libffi'),
+    'pkg:generic/libimagequant': devel_dict('libimagequant'),
     'pkg:generic/libjpeg': devel_dict('libjpeg-turbo'),
+    'pkg:generic/libraqm': devel_dict('libraqm'),
+    'pkg:generic/libtiff': devel_dict('libtiff'),
+    'pkg:generic/libxcb': devel_dict('libxcb'),
     'pkg:generic/libxml2': devel_dict('libxml2'),
     'pkg:generic/libxslt': devel_dict('libxslt'),
     'pkg:generic/libyaml': devel_dict('libyaml'),
+    'pkg:generic/libwebp': devel_dict('libwebp'),
+    'pkg:generic/openjpeg': devel_dict('openjpeg2'),
     'pkg:generic/openssl': devel_dict('openssl'),
+    'pkg:generic/tk': devel_dict('tk'),
     'pkg:generic/zlib': devel_dict('zlib'),
 })
 package_mapping['arch'].update({
+    'pkg:generic/freetype': unidict('freetype2'),
+    'pkg:generic/lcms2': unidict('lcms2'),
     'pkg:generic/libffi': unidict('libffi'),
+    'pkg:generic/libimagequant': unidict('libimagequant'),
     'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
+    'pkg:generic/libraqm': unidict('libraqm'),
+    'pkg:generic/libtiff': unidict('libtiff4'),  # separate in Arch, libtiff exists too
+    'pkg:generic/libxcb': unidict('libxcb'),
     'pkg:generic/libxml2': unidict('libxml2'),
     'pkg:generic/libxslt': unidict('libxslt'),
     'pkg:generic/libyaml': unidict('libyaml'),
+    'pkg:generic/libwebp': unidict('libwebp'),
+    'pkg:generic/openjpeg': unidict('openjpeg2'),
     'pkg:generic/openssl': unidict('openssl'),
+    'pkg:generic/tk': unidict('tk'),
     'pkg:generic/zlib': unidict('zlib'),
 })
 
@@ -113,12 +131,19 @@ def get_package_manager():
 
 def print_toml_key(key, table):
     if key in table:
-        print(f'[cyan]{key}[/] :')
-        for item in table[key]:
-            print(f'[bright_black]  {item}[/]')
+        print(f'[cyan]{key}[/]:')
+        if isinstance(table[key], list):
+            for item in table[key]:
+                print(f'[bright_black]  {item}[/]')
+        elif isinstance(table[key], dict):
+            for key2 in table[key]:
+                print(f'  [bright_black]{key2}[/]:')
+                for item in table[key][key2]:
+                    print(f'[bright_black]    {item}[/]')
 
 
 def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
+    """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
     external_run_deps = []
     toml = read_pyproject()
@@ -133,11 +158,12 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
                 if show:
                     print_toml_key(key, external)
 
-    for subkey in ('optional-build-requires', 'optional-host-requires', 'optional-dependencies'):
-        key = f'external.{subkey}'
-        if key in toml:
-            if show:
-                print_toml_key(key, toml[key])
+        for key in ('optional-build-requires', 'optional-host-requires', 'optional-dependencies'):
+            if key in external:
+                if 'requires' in key:
+                    external_build_deps.extend(external[key]['extra'])
+                if show:
+                    print_toml_key(key, external)
 
     if apply_mapping:
         distro_name = get_distro()
