@@ -8,13 +8,13 @@ defaults:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 
 permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
   no_external_metadata:
+    if: false
     strategy:
       matrix:
         platform:
@@ -37,9 +37,42 @@ jobs:
       - name: Build from sdist
         run: |
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install ${{ matrix.pkgdata[0] }} cryptography --no-binary ${{ matrix.pkgdata[0] }} -v
+          python -m pip install ${{ matrix.pkgdata[0] }} --no-binary ${{ matrix.pkgdata[0] }} -v
 
       - name: Import installed package
         run: |
-          cd .. 
+          python -c "import ${{ matrix.pkgdata[1] }}"
+
+  with_external_metadata:
+    strategy:
+      matrix:
+        platform:
+          # [container image name, display-name]
+          - ["fedora:39", Fedora]
+        pkgdata:
+          # [package-name, import-name]
+          - [cryptography, cryptography]
+          - [pyyaml, yaml]
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.platform[0] }}
+    name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        with:
+          python-version: '3.11'
+
+      - name: Download and patch sdist
+        run: |
+          python -m pip install pypi_json
+          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+
+      - name: Build from sdist
+        run: |
+          # Dependencies may be installed from wheels, the target package from sdist
+          python -m pip install sdist/amended_sdist.tar.gz -v
+
+      - name: Import installed package
+        run: |
           python -c "import ${{ matrix.pkgdata[1] }}"

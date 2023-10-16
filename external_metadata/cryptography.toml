@@ -1,0 +1,7 @@
+[external]
+build-requires = [
+  "virtual:compiler/rust",
+]
+host-requires = [
+  "pkg:generic/openssl",
+]

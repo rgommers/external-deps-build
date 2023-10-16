@@ -1,0 +1,69 @@
+import argparse
+from pathlib import Path
+import tarfile
+import urllib.request
+
+from pypi_json import PyPIJSON
+
+
+def download_sdist(package_name, sdist_dir):
+    with PyPIJSON() as client:
+        metadata = client.get_metadata(package_name)
+
+    url = None
+    for item in metadata.get_wheel_tag_mapping():
+        if isinstance(item, list):  # sdist
+            assert len(item) == 1 and str(item[0]).endswith('tar.gz')
+            url = str(item[0])
+
+    if url is None:
+        raise RuntimeError(f"No sdist for package {package_name} found.")
+
+    fname_sdist = url.split('/')[-1]
+    urllib.request.urlretrieve(url, sdist_dir / fname_sdist)
+    return fname_sdist
+
+
+def untar_sdist(fname_sdist, sdist_dir):
+    tar = tarfile.open(sdist_dir / fname_sdist)
+
+    for info in tar.getmembers():
+        name = info.name
+        if '/' in name and name.split('/')[1] == 'pyproject.toml':
+            break
+
+    tar.extractall(path=sdist_dir)
+
+    pyproject_toml = sdist_dir / name
+    if not (pyproject_toml).exists():
+        raise ValueError(f"{fname_sdist} does not contain a pyproject.toml file")
+
+    return pyproject_toml
+
+
+def append_external_metadata(fname_sdist, package_name):
+    with open(fname_sdist, 'a') as f:
+        f.write('\n')
+        with open(f'external_metadata/{package_name}.toml') as f2:
+            f.write(f2.read())
+
+
+def create_new_sdist(sdist_name, sdist_dir):
+    dirname = sdist_name.split('.tar.gz')[0]
+    with tarfile.open(sdist_dir / 'amended_sdist.tar.gz', "w:gz") as tar:
+            tar.add(sdist_dir / dirname, arcname=dirname)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('package_name')
+    args = parser.parse_args()
+
+    package_name = args.package_name
+
+    sdist_dir = Path('./sdist')
+    sdist_dir.mkdir(exist_ok=True)
+
+    fname_sdist = download_sdist(package_name, sdist_dir)
+    fname_pyproject_toml = untar_sdist(fname_sdist, sdist_dir)
+    append_external_metadata(fname_pyproject_toml, package_name)
+    create_new_sdist(fname_sdist, sdist_dir)
