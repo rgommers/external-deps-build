@@ -33,13 +33,14 @@ def unidict(deps: str | list[str]) -> dict[str, list[str]]:
 
 
 def devel_dict(deps: str | list[str]) -> dict[str, list[str]]:
-    """Use when build equals run dependencies plus headers in `run-devel` packages"""
+    """Use when build dep equals run dependencies plus `-devel`"""
     if type(deps) == str:
         deps = [deps]
 
-    build_deps = deps.copy()
-    build_deps.extend([s+'-devel' for s in deps])
-    return dict(run=deps, build=build_deps)
+    #build_deps = deps.copy()
+    #build_deps.extend([s+'-devel' for s in deps])
+    #return dict(run=deps, build=build_deps)
+    return dict(run=deps, build=[s+'-devel' for s in deps])
 
 
 # For external dependencies; for Python/PyPI ones we will make use of existing
@@ -61,13 +62,21 @@ package_mapping['arch'] = {
 
 package_mapping['fedora'].update({
     'pkg:generic/libffi': devel_dict('libffi'),
+    'pkg:generic/libjpeg': devel_dict('libjpeg-turbo'),
+    'pkg:generic/libxml2': devel_dict('libxml2'),
+    'pkg:generic/libxslt': devel_dict('libxslt'),
     'pkg:generic/libyaml': devel_dict('libyaml'),
     'pkg:generic/openssl': devel_dict('openssl'),
+    'pkg:generic/zlib': devel_dict('zlib'),
 })
 package_mapping['arch'].update({
     'pkg:generic/libffi': unidict('libffi'),
+    'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
+    'pkg:generic/libxml2': unidict('libxml2'),
+    'pkg:generic/libxslt': unidict('libxslt'),
     'pkg:generic/libyaml': unidict('libyaml'),
     'pkg:generic/openssl': unidict('openssl'),
+    'pkg:generic/zlib': unidict('zlib'),
 })
 
 

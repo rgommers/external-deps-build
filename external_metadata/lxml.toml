@@ -1,0 +1,6 @@
+[external]
+build-requires = [
+  "virtual:compiler/c",
+  "pkg:generic/libxml2",
+  "pkg:generic/libxslt",
+]

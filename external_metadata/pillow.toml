@@ -1,0 +1,6 @@
+[external]
+build-requires = [
+  "virtual:compiler/c",
+  "pkg:generic/libjpeg",
+  "pkg:generic/zlib",
+]
