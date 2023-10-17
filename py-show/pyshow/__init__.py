@@ -15,10 +15,11 @@ package_manager = {
     'ubuntu': 'apt-get',
 }
 
+# TODO: the --yes/--noconfirm should be made opt-in (only good default for CI testing)
 package_mgr_install_commands = {
     'apt-get': 'sudo apt-get install --yes',
     'dnf': 'sudo dnf install -y',
-    'pacman': 'sudo pacman -Syu',
+    'pacman': 'sudo pacman -Syu --noconfirm',
 }
 
 # For `rust` virtual package: make that provide `rustc` and `cargo`? Different

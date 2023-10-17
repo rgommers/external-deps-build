@@ -46,7 +46,8 @@ jobs:
       matrix:
         platform:
           # [container image name, display-name]
-          - ["fedora:39", Fedora]
+          - ["fedora:39", "Fedora"]
+          - ["archlinux:latest", "Arch"]
         pkgdata:
           # [package-name, import-name]
           #- [cryptography, cryptography]
@@ -80,7 +81,13 @@ jobs:
 
       - name: Install system Python
         run: |
-          sudo dnf install -y python  # will install 3.12
+          if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
+            sudo dnf install -y python  # will install 3.12
+          elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
+            pacman -Syu python sudo --noconfirm # will install 3.11
+          else
+            echo 'Unsupported distro!'
+          fi
 
       - name: Download and patch sdist
         run: |
