@@ -1,7 +1,7 @@
 [external]
 build-requires = [
   "virtual:compiler/c",
-  "virtual:compiler/c++",
+  "virtual:compiler/cpp",
 ]
 
 # Note that there are quite a few optional dependencies, but they aren't used

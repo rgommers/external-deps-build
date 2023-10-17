@@ -51,13 +51,14 @@ jobs:
           # [package-name, import-name]
           #- [cryptography, cryptography]
           - [pyyaml, yaml]
-          #- [lxml, lxml]              # no pyproject.toml in sdist
+          #- [lxml, lxml]              # no pyproject.toml in sdist; doesn't work, absolute import in setup.py to setupinfo
           #- [greenlet, greenlet]      # no pyproject.toml in sdist
-          #- [httptools, greenlet]     # no pyproject.toml in sdist
+          #- [httptools, httptools]     # no pyproject.toml in sdist
           #- [markupsafe, markupsafe]  # no pyproject.toml in sdist
-          #- [grpcio, grpc]            # no pyproject.toml in sdist
-          #- [sqlalchemy, grpc]            # no pyproject.toml in sdist
+          #- [grpcio, grpc]            # no pyproject.toml in sdist; doesn't work, absolute import in setup.py to _metadata
+          #- [sqlalchemy, sqlalchemy]  # no pyproject.toml in sdist
           #- [wrapt, wrapt]            # no pyproject.toml in sdist
+          #- [protobuf, google.protobuf]     # no pyproject.toml in sdist
           #- [charset_normalizer, charset_normalizer]  # no pyproject.toml in sdist
           #- [pillow, PIL]
           #- [cffi, cffi]
@@ -67,9 +68,10 @@ jobs:
           #- [yarl, yarl]
           #- [aiohttp, aiohttp]
           #- [psutil, psutil]
-          - [numpy, numpy]
-          - [pandas, pandas]
-          #- [scipy, scipy]  # Failing on Fedora because no openblas.pc
+          #- [numpy, numpy]
+          #- [pandas, pandas]
+          #- [scipy, scipy]  # Failing on Fedora because no openblas.pc (will work with FlexiBLAS soon)
+          - [pyarrow, pyarrow]
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}

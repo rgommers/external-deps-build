@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 import tarfile
 import urllib.request
+import warnings
 
 from pypi_json import PyPIJSON
 
@@ -24,6 +25,12 @@ def download_sdist(package_name, sdist_dir):
     return fname_sdist
 
 
+_toml_setuptools = """[build-system]
+requires = ["setuptools", "versioninfo"]
+build-backend = "setuptools.build_meta"
+"""
+
+
 def untar_sdist(fname_sdist, sdist_dir):
     tar = tarfile.open(sdist_dir / fname_sdist)
 
@@ -34,9 +41,11 @@ def untar_sdist(fname_sdist, sdist_dir):
 
     tar.extractall(path=sdist_dir)
 
-    pyproject_toml = sdist_dir / name
+    pyproject_toml = sdist_dir / info.name.split('/')[0] / 'pyproject.toml'
     if not (pyproject_toml).exists():
-        raise ValueError(f"{fname_sdist} does not contain a pyproject.toml file")
+        warnings.warn(f"{fname_sdist} does not contain a pyproject.toml file", UserWarning)
+        with open(pyproject_toml, 'w') as f:
+            f.write(_toml_setuptools)
 
     return pyproject_toml
 
@@ -52,6 +61,7 @@ def create_new_sdist(sdist_name, sdist_dir):
     dirname = sdist_name.split('.tar.gz')[0]
     with tarfile.open(sdist_dir / 'amended_sdist.tar.gz', "w:gz") as tar:
             tar.add(sdist_dir / dirname, arcname=dirname)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
