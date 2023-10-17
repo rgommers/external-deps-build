@@ -2,6 +2,7 @@
 build-requires = [
   "virtual:compiler/c",
   "virtual:compiler/rust",
+  "pkg:generic/pkg-config",
 ]
 host-requires = [
   "pkg:generic/openssl",

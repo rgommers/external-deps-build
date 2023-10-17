@@ -3,7 +3,6 @@ build-requires = [
   "virtual:compiler/c",
   "virtual:compiler/cpp",
   "pkg:generic/cmake",
-  "pkg:generic/ninja",  # note; not needed on Windows - TODO handle specifiers in py-show
 ]
 
 host-requires = [
@@ -14,3 +13,8 @@ host-requires = [
 # setup.py), but a plain `pip install` defaults to not using those even if they
 # are installed, so we don't list them here to keep the install of system
 # dependencies leaner.
+[external.optional-build-requires]
+extra = [
+  "pkg:generic/make",
+  "pkg:generic/ninja",
+]

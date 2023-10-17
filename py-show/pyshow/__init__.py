@@ -59,10 +59,10 @@ package_mapping['fedora'] = {
 package_mapping['arch'] = {
     'virtual:compiler/c': unidict('gcc'),
     'virtual:compiler/cpp': unidict('gcc'),
-    'virtual:compiler/fortran': unidict('gcc-gfortran'),
+    'virtual:compiler/fortran': unidict('gcc-fortran'),
     'virtual:compiler/rust': unidict('rust'),
-    'virtual:interface/blas': devel_dict('openblas'),
-    'virtual:interface/lapack': devel_dict('openblas'),
+    'virtual:interface/blas': unidict('openblas'),
+    'virtual:interface/lapack': unidict('openblas'),
 }
 
 package_mapping['fedora'].update({
@@ -79,6 +79,7 @@ package_mapping['fedora'].update({
     'pkg:generic/libxslt': devel_dict('libxslt'),
     'pkg:generic/libyaml': devel_dict('libyaml'),
     'pkg:generic/libwebp': devel_dict('libwebp'),
+    'pkg:generic/make': devel_dict('make'),
     'pkg:generic/ninja': unidict('ninja-build'),
     'pkg:generic/openjpeg': devel_dict('openjpeg2'),
     'pkg:generic/openssl': devel_dict('openssl'),
@@ -103,6 +104,7 @@ package_mapping['arch'].update({
     'pkg:generic/libxslt': unidict('libxslt'),
     'pkg:generic/libyaml': unidict('libyaml'),
     'pkg:generic/libwebp': unidict('libwebp'),
+    'pkg:generic/make': unidict('make'),
     'pkg:generic/ninja': unidict('ninja'),
     'pkg:generic/openjpeg': unidict('openjpeg2'),
     'pkg:generic/openssl': unidict('openssl'),
