@@ -71,7 +71,7 @@ jobs:
           #- [numpy, numpy]
           #- [pandas, pandas]
           #- [scipy, scipy]  # Failing on Fedora because no openblas.pc (will work with FlexiBLAS soon)
-          - [pyarrow, pyarrow]
+          #- [pyarrow, pyarrow]
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}

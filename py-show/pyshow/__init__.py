@@ -65,6 +65,7 @@ package_mapping['arch'] = {
 }
 
 package_mapping['fedora'].update({
+    'pkg:generic/cmake': unidict('cmake'),
     'pkg:generic/freetype': devel_dict('freetype'),
     'pkg:generic/lcms2': devel_dict('lcms2'),
     'pkg:generic/libffi': devel_dict('libffi'),
@@ -84,8 +85,11 @@ package_mapping['fedora'].update({
     'pkg:generic/python': devel_dict('python'),
     'pkg:generic/tk': devel_dict('tk'),
     'pkg:generic/zlib': devel_dict('zlib'),
+    'pkg:github/apache/arrow': devel_dict('libarrow'),
+    'pkg:generic/arrow': devel_dict('libarrow'),
 })
 package_mapping['arch'].update({
+    'pkg:generic/cmake': unidict('cmake'),
     'pkg:generic/freetype': unidict('freetype2'),
     'pkg:generic/lcms2': unidict('lcms2'),
     'pkg:generic/libffi': unidict('libffi'),
@@ -105,6 +109,8 @@ package_mapping['arch'].update({
     'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
     'pkg:generic/tk': unidict('tk'),
     'pkg:generic/zlib': unidict('zlib'),
+    'pkg:github/apache/arrow': unidict('arrow'),
+    'pkg:generic/arrow': unidict('arrow'),
 })
 
 
@@ -196,6 +202,9 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
                 raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
 
         if _uses_c_cpp_compiler(external_build_deps):
+            # TODO: handling of non-default Python installs isn't done here,
+            # this adds the python-dev/devel package corresponding to the
+            # default Python version of the distro.
             _mapped_deps.extend(get_python_dev(distro_name))
 
         return _mapped_deps
