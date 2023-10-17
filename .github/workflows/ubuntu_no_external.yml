@@ -76,17 +76,20 @@ jobs:
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
-      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
-        with:
-          python-version: '3.11'
+      - name: Install system Python
+        run: |
+          sudo dnf install -y python  # will install 3.12
 
       - name: Download and patch sdist
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install pypi_json distro typer rich
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
 
       - name: Install external dependencies
         run: |
+          source venv/bin/activate
           name=${{ matrix.pkgdata[0]}}
           shopt -s expand_aliases
           alias py-show="python py-show/pyshow/__init__.py"  # not a package yet
@@ -96,9 +99,11 @@ jobs:
 
       - name: Build from sdist
         run: |
+          source venv/bin/activate
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/amended_sdist.tar.gz -v
 
       - name: Import installed package
         run: |
+          source venv/bin/activate
           python -c "import ${{ matrix.pkgdata[1] }}"

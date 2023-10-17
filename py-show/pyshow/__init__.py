@@ -78,9 +78,10 @@ package_mapping['fedora'].update({
     'pkg:generic/libyaml': devel_dict('libyaml'),
     'pkg:generic/libwebp': devel_dict('libwebp'),
     'pkg:generic/ninja': unidict('ninja-build'),
-    'pkg:generic/pkg-config': unidict('pkgconfig'),
     'pkg:generic/openjpeg': devel_dict('openjpeg2'),
     'pkg:generic/openssl': devel_dict('openssl'),
+    'pkg:generic/pkg-config': unidict('pkgconfig'),
+    'pkg:generic/python': devel_dict('python'),
     'pkg:generic/tk': devel_dict('tk'),
     'pkg:generic/zlib': devel_dict('zlib'),
 })
@@ -101,6 +102,7 @@ package_mapping['arch'].update({
     'pkg:generic/openjpeg': unidict('openjpeg2'),
     'pkg:generic/openssl': unidict('openssl'),
     'pkg:generic/pkg-config': unidict('pkgconf'),
+    'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
     'pkg:generic/tk': unidict('tk'),
     'pkg:generic/zlib': unidict('zlib'),
 })
@@ -173,7 +175,11 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
                 if show:
                     print_toml_key(key, external)
 
-    if apply_mapping:
+    if not apply_mapping:
+        all_deps = external_build_deps.copy()
+        all_deps.extend(external_run_deps)
+        return all_deps
+    else:
         distro_name = get_distro()
         _mapping = package_mapping[distro_name]
         _mapped_deps = []
@@ -188,11 +194,28 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
                 _mapped_deps.extend(_mapping[dep]['run'])
             except KeyError:
                 raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
+
+        if _uses_c_cpp_compiler(external_build_deps):
+            _mapped_deps.extend(get_python_dev(distro_name))
+
         return _mapped_deps
-    else:
-        all_deps = external_build_deps.copy()
-        all_deps.extend(external_run_deps)
-        return
+
+
+def _uses_c_cpp_compiler(external_build_deps: list[str]) -> bool:
+    for compiler in ('virtual:compiler/c', 'virtual:compiler/cpp'):
+        if compiler in external_build_deps:
+            return True
+    return False
+
+
+def get_python_dev(distro_name) -> list[str]:
+    """Return the python development package to list of dependencies
+
+    This is an implicit dependency for packages that use a C or C++ compiler to
+    build Python extension modules.
+    """
+    _mapping = package_mapping[distro_name]
+    return _mapping['pkg:generic/python']['build']
 
 
 def main(package_name: str,
