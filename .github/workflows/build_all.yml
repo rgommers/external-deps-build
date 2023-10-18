@@ -33,7 +33,7 @@ jobs:
           - [sqlalchemy, sqlalchemy]
           - [wrapt, wrapt]
           - [protobuf, google.protobuf]
-          - [charset_normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
+          - [charset-normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
           - [pillow, PIL]
           - [cffi, cffi]
           - [frozenlist, frozenlist]
