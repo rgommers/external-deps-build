@@ -13,6 +13,7 @@ package_manager = {
     'arch': 'pacman',
     'fedora': 'dnf',
     'ubuntu': 'apt-get',
+    'conda-forge': 'mamba',
 }
 
 # TODO: the --yes/--noconfirm should be made opt-in (only good default for CI testing)
@@ -20,6 +21,9 @@ package_mgr_install_commands = {
     'apt-get': 'sudo apt-get install --yes',
     'dnf': 'sudo dnf install -y',
     'pacman': 'sudo pacman -Syu --noconfirm',
+    'micromamba': 'micromamba install --yes',
+    'mamba': 'mamba install --yes',
+    'conda': 'conda install --yes',
 }
 
 # For `rust` virtual package: make that provide `rustc` and `cargo`? Different
@@ -61,8 +65,17 @@ package_mapping['arch'] = {
     'virtual:compiler/cpp': unidict('gcc'),
     'virtual:compiler/fortran': unidict('gcc-fortran'),
     'virtual:compiler/rust': unidict('rust'),
-    'virtual:interface/blas': unidict('openblas'),
-    'virtual:interface/lapack': unidict('openblas'),
+    'virtual:interface/blas': devel_dict('blas'),
+    'virtual:interface/lapack': dict(run=['lapack'], build=['lapack', 'blas-devel']),
+}
+
+package_mapping['conda-forge'] = {
+    'virtual:compiler/c': unidict('c-compiler'),
+    'virtual:compiler/cpp': unidict('cxx-compiler'),
+    'virtual:compiler/fortran': unidict('fortran-compiler'),
+    'virtual:compiler/rust': unidict('rust'),
+    'virtual:interface/blas': unidict('blas'),
+    'virtual:interface/lapack': unidict('lapack'),
 }
 
 package_mapping['fedora'].update({
@@ -119,6 +132,34 @@ package_mapping['arch'].update({
     'pkg:github/apache/arrow': unidict('arrow'),
     'pkg:generic/arrow': unidict('arrow'),
 })
+package_mapping['conda-forge'].update({
+    'pkg:generic/cmake': unidict('cmake'),
+    'pkg:generic/freetype': unidict('freetype'),
+    'pkg:generic/gmp': unidict('gmp'),
+    'pkg:generic/lcms2': unidict('lcms2'),
+    'pkg:generic/libffi': unidict('libffi'),
+    'pkg:generic/libimagequant': unidict('libimagequant'),
+    'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
+    'pkg:generic/libpq': unidict('libpq'),
+    'pkg:generic/libraqm': dict(run=[], build=[]), # not available, should warn if in optional, raise otherwise?
+    'pkg:generic/libtiff': unidict('libtiff'),
+    'pkg:generic/libxcb': unidict('libxcb'),
+    'pkg:generic/libxml2': unidict('libxml2'),
+    'pkg:generic/libxslt': unidict('libxslt'),
+    'pkg:generic/libyaml': unidict('yaml'),
+    'pkg:generic/libwebp': unidict('libwebp'),
+    'pkg:generic/make': unidict('make'),
+    'pkg:generic/ninja': unidict('ninja'),
+    'pkg:generic/openjpeg': unidict('openjpeg'),
+    'pkg:generic/openssl': unidict('openssl'),
+    'pkg:generic/pkg-config': unidict('pkg-config'),
+    'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
+    'pkg:generic/tk': unidict('tk'),
+    'pkg:generic/zlib': unidict('zlib'),
+    'pkg:github/apache/arrow': unidict('libarrow'),
+    'pkg:generic/arrow': unidict('libarrow'),
+})
+
 
 
 def read_pyproject(fname_sdist='./sdist/amended_sdist.tar.gz'):
@@ -165,7 +206,8 @@ def print_toml_key(key, table):
                     print(f'[bright_black]    {item}[/]')
 
 
-def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
+def parse_external(show: bool = False, apply_mapping: bool = False,
+                   distro_name: str = None) -> list[str]:
     """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
     external_run_deps = []
@@ -193,7 +235,8 @@ def parse_external(show: bool = False, apply_mapping=False) -> list[str]:
         all_deps.extend(external_run_deps)
         return all_deps
     else:
-        distro_name = get_distro()
+        if distro_name is None:
+            distro_name = get_distro()
         _mapping = package_mapping[distro_name]
         _mapped_deps = []
         for dep in external_build_deps:
@@ -239,6 +282,7 @@ def main(package_name: str,
     system_install_cmd: Annotated[bool, typer.Option(
         help="Show install command with system package manager for `--pypi` and/or "
              "`--external` dependencies")] = False,
+    package_manager: Annotated[str, typer.Option(help="If given, use this package manager rather than auto-detect one")] = "",
     ) -> None:
     """
     py-show: inspecting package dependencies
@@ -246,10 +290,16 @@ def main(package_name: str,
     if external:
         parse_external(show=not system_install_cmd)
 
+    distro_name = None
+    if package_manager:
+        if package_manager in ('conda', 'mamba', 'micromamba'):
+            distro_name = 'conda-forge'
+    else:
+        package_manager = get_package_manager()
+
     if system_install_cmd:
-        pkg_mgr = get_package_manager()
-        install_cmd = package_mgr_install_commands[pkg_mgr]
-        external_deps = parse_external(apply_mapping=True)
+        install_cmd = package_mgr_install_commands[package_manager]
+        external_deps = parse_external(apply_mapping=True, distro_name=distro_name)
         _deps = ' '.join(external_deps)
         print(f"{install_cmd} {_deps}")
 

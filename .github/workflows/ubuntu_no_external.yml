@@ -66,11 +66,12 @@ jobs:
           # [container image name, display-name, use-external]
           - ["archlinux:latest", "Arch", false]  # baseline
           - ["archlinux:latest", "Arch", true]
-          #- ["fedora:39", "Fedora", true]
+          - ["fedora:39", "Fedora", true]
+          - ["archlinux:latest", "conda-forge", true]
         pkgdata:
           # [package-name, import-name]
           - [cryptography, cryptography]
-          - [pyyaml, yaml]
+          - [pyyaml, yaml]  # poor detection of libyaml, doesn't work with conda-forge
           - [lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
           - [greenlet, greenlet]
           - [httptools, httptools]
@@ -79,7 +80,7 @@ jobs:
           - [sqlalchemy, sqlalchemy]
           - [wrapt, wrapt]
           - [protobuf, google.protobuf]
-          - [charset_normalizer, charset_normalizer]
+          - [charset_normalizer, charset_normalizer]  # no luck with conda-forge
           - [pillow, PIL]
           - [cffi, cffi]
           - [frozenlist, frozenlist]
@@ -98,7 +99,7 @@ jobs:
           - [bcrypt, bcrypt]
           - [scikit-learn, sklearn]
           - [msgpack, msgpack]
-          - [matplotlib, matplotlib]
+          - [matplotlib, matplotlib]  # Failing on conda-forge, missing Freetype symbols.
           - [regex, regex]
           - [kiwisolver, kiwisolver]
           - [pydantic-core, pydantic_core]
@@ -118,6 +119,12 @@ jobs:
             sudo dnf install -y python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
             pacman -Syu python sudo --noconfirm # will install 3.11
+          elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+            ~/.local/bin/micromamba shell init -s bash -p ~/micromamba
+            source ~/.bashrc
+            cp .mambarc ~/.mambarc
+            micromamba create -n cfenv python pip  # will install 3.12
           else
             echo 'Unsupported distro!'
           fi
@@ -125,18 +132,34 @@ jobs:
       - name: Download and patch sdist
         if: ${{ matrix.platform[2] }}
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            python -m venv venv
+            source venv/bin/activate
+          fi
+
           python -m pip install pypi_json distro typer rich
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
 
       - name: Install external dependencies
         if: ${{ matrix.platform[2] }}
         run: |
-          source venv/bin/activate
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            source venv/bin/activate
+          fi
           name=${{ matrix.pkgdata[0]}}
+
+          # `py-show` is not a package yet, so define an alias
           shopt -s expand_aliases
-          alias py-show="python py-show/pyshow/__init__.py"  # not a package yet
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            alias py-show="python py-show/pyshow/__init__.py --package-manager=micromamba"
+          else
+            alias py-show="python py-show/pyshow/__init__.py"
+          fi
+
           py-show --external $name
           py-show --external --system-install-cmd $name
           $(py-show --external --system-install-cmd $name)
@@ -144,7 +167,11 @@ jobs:
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
         run: |
-          source venv/bin/activate
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            source venv/bin/activate
+          fi
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/amended_sdist.tar.gz -v
 
@@ -158,5 +185,10 @@ jobs:
 
       - name: Import installed package
         run: |
-          source venv/bin/activate
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            source venv/bin/activate
+          fi
+
           python -c "import ${{ matrix.pkgdata[1] }}"
