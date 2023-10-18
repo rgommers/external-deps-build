@@ -110,3 +110,19 @@ jobs:
           fi
 
           python -c "import ${{ matrix.pkgdata[1] }}"
+
+  summarize_results:
+    if: always()
+    needs: with_external_metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get results of wheel build jobs
+        run: |
+          echo ${{ github.event.workflow_run.jobs_url }}
+
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            ${{ github.event.workflow_run.jobs_url }} > results.json
+
+          cat results.json
