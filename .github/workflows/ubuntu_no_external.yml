@@ -10,55 +10,8 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
-  no_external_metadata:
-    if: false
-    strategy:
-      fail-fast: false
-      matrix:
-        pkgdata:
-          # [package-name, import-name]
-          - [cryptography, cryptography]
-          - [pyyaml, yaml]
-          - [lxml, lxml]
-          - [greenlet, greenlet]
-          - [httptools, httptools]
-          - [markupsafe, markupsafe]
-          - [grpcio, grpc]
-          - [sqlalchemy, sqlalchemy]
-          - [wrapt, wrapt]
-          - [protobuf, google.protobuf]
-          - [charset_normalizer, charset_normalizer]
-          - [pillow, PIL]
-          - [cffi, cffi]
-          - [frozenlist, frozenlist]
-          - [multidict, multidict]
-          - [coverage, coverage]
-          - [yarl, yarl]
-          - [aiohttp, aiohttp]
-          - [psutil, psutil]
-          - [numpy, numpy]
-          - [pandas, pandas]
-          - [scipy, scipy]
-          - [pyarrow, pyarrow]
-    runs-on: ubuntu-22.04
-    name: ${{ matrix.pkgdata[0] }}, Ubuntu (no-external)
-    steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
-
-      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
-        with:
-          python-version: '3.11'
-
-      - name: Build from sdist
-        run: |
-          # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install ${{ matrix.pkgdata[0] }} --no-binary ${{ matrix.pkgdata[0] }} -v
-
-      - name: Import installed package
-        run: |
-          python -c "import ${{ matrix.pkgdata[1] }}"
-
   with_external_metadata:
+    if: "github.repository == 'scipy/scipy'"
     strategy:
       fail-fast: false
       matrix:
