@@ -11,22 +11,37 @@ def is_pure(package_name):
     if len(tags_mapping) < 2:
         raise ValueError(f"{package_name}: has no sdist or no wheel - verify this manually")
 
+    _has_an_sdist = False
+    _has_a_platform_wheel = False
     for item in tags_mapping:
         if isinstance(item, list):  # sdist
-            assert len(item) == 1 and str(item[0]).endswith('tar.gz')
+            if len(item) == 1:
+                _fname = str(item[0])
+                if _fname.endswith('tar.gz'):
+                    _has_an_sdist = True
+                elif not _fname.endswith('.zip'):
+                    # If it only has a .zip, that's old-style and we don't
+                    # handle that in the sdist patching, so skip package
+                    print('Unexpected file extension for package: ', _fname)
         else:  # wheel
             try:
                 tag = list(item.keys())[0]
             except IndexError:
-                print(pkgname)
-                print(item)
+                print('No wheels found for package: ', pkgname)
+                continue
             if str(tag).endswith('py3-none-any'):
                 return True
-    return False
+            _has_a_platform_wheel = True
+
+    if _has_a_platform_wheel and _has_an_sdist:
+        return False
+    else:
+        # Unknown actually, so skip these packages
+        return True
 
 
 with open('top-pypi-packages-30-days.json') as f:
-    data_top100 = json.load(f)['rows'][:100]
+    data_top100 = json.load(f)['rows'][:150]
     pkgnames = [row['project'] for row in data_top100]
 
 

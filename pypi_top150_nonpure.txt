@@ -21,3 +21,17 @@ yarl
 multidict
 scipy
 httptools
+pynacl
+psycopg2-binary
+rpds-py
+bcrypt
+scikit-learn
+msgpack
+matplotlib
+regex
+kiwisolver
+pydantic-core
+pyrsistent
+grpcio-tools
+pycryptodomex
+google-crc32c
