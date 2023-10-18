@@ -24,7 +24,7 @@ jobs:
         pkgdata:
           # [package-name, import-name]
           - [cryptography, cryptography]
-          - [pyyaml, yaml]  # poor detection of libyaml, doesn't work with conda-forge
+          - [pyyaml, yaml]  # poor detection of libyaml, falls back to pure Python on conda-forge
           - [lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
           - [greenlet, greenlet]
           - [httptools, httptools]
@@ -33,14 +33,14 @@ jobs:
           - [sqlalchemy, sqlalchemy]
           - [wrapt, wrapt]
           - [protobuf, google.protobuf]
-          - [charset_normalizer, charset_normalizer]  # no luck with conda-forge
+          - [charset_normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
           - [pillow, PIL]
           - [cffi, cffi]
           - [frozenlist, frozenlist]
           - [multidict, multidict]
           - [coverage, coverage]
           - [yarl, yarl]
-          - [aiohttp, aiohttp]
+          - [aiohttp, aiohttp]  # doesn't build on Python 3.12 yet
           - [psutil, psutil]
           - [numpy, numpy]
           - [pandas, pandas]

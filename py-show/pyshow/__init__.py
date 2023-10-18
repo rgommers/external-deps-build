@@ -65,8 +65,8 @@ package_mapping['arch'] = {
     'virtual:compiler/cpp': unidict('gcc'),
     'virtual:compiler/fortran': unidict('gcc-fortran'),
     'virtual:compiler/rust': unidict('rust'),
-    'virtual:interface/blas': devel_dict('blas'),
-    'virtual:interface/lapack': dict(run=['lapack'], build=['lapack', 'blas-devel']),
+    'virtual:interface/blas': unidict('openblas'),
+    'virtual:interface/lapack': unidict('openblas'),
 }
 
 package_mapping['conda-forge'] = {
@@ -75,7 +75,7 @@ package_mapping['conda-forge'] = {
     'virtual:compiler/fortran': unidict('fortran-compiler'),
     'virtual:compiler/rust': unidict('rust'),
     'virtual:interface/blas': unidict('blas'),
-    'virtual:interface/lapack': unidict('lapack'),
+    'virtual:interface/lapack': dict(run=['lapack'], build=['lapack', 'blas-devel']),
 }
 
 package_mapping['fedora'].update({
