@@ -142,25 +142,26 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          # [container image name, display-name]
-          #- ["fedora:39", "Fedora"]
-          - ["archlinux:latest", "Arch"]
+          # [container image name, display-name, use-external]
+          - ["archlinux:latest", "Arch", false]  # baseline
+          #- ["archlinux:latest", "Arch", true]
+          #- ["fedora:39", "Fedora", true]
         pkgdata:
           # [package-name, import-name]
           - [pynacl, nacl]
-          #- [psycopg2-binary, psycopg2]
-          #- [rpds-py, rpds]
-          #- [bcrypt, bcrypt]
-          #- [scikit-learn, sklearn]
-          #- [msgpack, msgpack]
+          - [psycopg2-binary, psycopg2]
+          - [rpds-py, rpds]
+          - [bcrypt, bcrypt]
+          - [scikit-learn, sklearn]
+          - [msgpack, msgpack]
           - [matplotlib, matplotlib]
-          #- [regex, regex]
-          #- [kiwisolver, kiwisolver]
-          #- [pydantic-core, pydantic_core]
-          #- [pyrsistent, pyrsistent]
-          #- [grpcio-tools, grpc]
-          #- [pycryptodomex, Cryptodome]
-          #- [google-crc32c, google_crc32c]
+          - [regex, regex]
+          - [kiwisolver, kiwisolver]
+          - [pydantic-core, pydantic_core]
+          - [pyrsistent, pyrsistent]
+          - [grpcio-tools, grpc]
+          - [pycryptodomex, Cryptodome]
+          - [google-crc32c, google_crc32c]
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
@@ -178,6 +179,7 @@ jobs:
           fi
 
       - name: Download and patch sdist
+        if: ${{ matrix.platform[2] }}
         run: |
           python -m venv venv
           source venv/bin/activate
@@ -185,6 +187,7 @@ jobs:
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
 
       - name: Install external dependencies
+        if: ${{ matrix.platform[2] }}
         run: |
           source venv/bin/activate
           name=${{ matrix.pkgdata[0]}}
@@ -195,10 +198,19 @@ jobs:
           $(py-show --external --system-install-cmd $name)
 
       - name: Build from sdist
+        if: ${{ matrix.platform[2] }}
         run: |
           source venv/bin/activate
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/amended_sdist.tar.gz -v
+
+      - name: Build from PyPI, no external deps
+        if: ${{ !matrix.platform[2] }}
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          # Dependencies may be installed from wheels, the target package from sdist
+          python -m pip install ${{ matrix.pkgdata[0] }} --no-binary ${{ matrix.pkgdata[0] }} -v
 
       - name: Import installed package
         run: |
