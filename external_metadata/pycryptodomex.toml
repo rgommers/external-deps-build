@@ -1,0 +1,9 @@
+[external]
+build-requires = [
+  "virtual:compiler/c",
+]
+
+[external.optional-dependencies]
+extra = [
+  "pkg:generic/gmp",
+]

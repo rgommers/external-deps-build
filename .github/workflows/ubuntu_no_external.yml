@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   no_external_metadata:
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -58,6 +59,7 @@ jobs:
           python -c "import ${{ matrix.pkgdata[1] }}"
 
   with_external_metadata:
+    if: false  # This is done - adding new packages separately
     strategy:
       fail-fast: false
       matrix:
@@ -90,6 +92,75 @@ jobs:
           - [pandas, pandas]
           - [scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
           - [pyarrow, pyarrow]
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.platform[0] }}
+    name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - name: Install system Python
+        run: |
+          if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
+            sudo dnf install -y python  # will install 3.12
+          elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
+            pacman -Syu python sudo --noconfirm # will install 3.11
+          else
+            echo 'Unsupported distro!'
+          fi
+
+      - name: Download and patch sdist
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install pypi_json distro typer rich
+          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+
+      - name: Install external dependencies
+        run: |
+          source venv/bin/activate
+          name=${{ matrix.pkgdata[0]}}
+          shopt -s expand_aliases
+          alias py-show="python py-show/pyshow/__init__.py"  # not a package yet
+          py-show --external $name
+          py-show --external --system-install-cmd $name
+          $(py-show --external --system-install-cmd $name)
+
+      - name: Build from sdist
+        run: |
+          source venv/bin/activate
+          # Dependencies may be installed from wheels, the target package from sdist
+          python -m pip install sdist/amended_sdist.tar.gz -v
+
+      - name: Import installed package
+        run: |
+          source venv/bin/activate
+          python -c "import ${{ matrix.pkgdata[1] }}"
+
+
+  beyond_top_100:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          # [container image name, display-name]
+          #- ["fedora:39", "Fedora"]
+          - ["archlinux:latest", "Arch"]
+        pkgdata:
+          # [package-name, import-name]
+          - [pynacl, nacl]
+          #- [psycopg2-binary, psycopg2]
+          #- [rpds-py, rpds]
+          #- [bcrypt, bcrypt]
+          #- [scikit-learn, sklearn]
+          #- [msgpack, msgpack]
+          - [matplotlib, matplotlib]
+          #- [regex, regex]
+          #- [kiwisolver, kiwisolver]
+          #- [pydantic-core, pydantic_core]
+          #- [pyrsistent, pyrsistent]
+          #- [grpcio-tools, grpc]
+          #- [pycryptodomex, Cryptodome]
+          #- [google-crc32c, google_crc32c]
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}

@@ -1,0 +1,4 @@
+[external]
+build-requires = [
+  "virtual:compiler/cpp",
+]

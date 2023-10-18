@@ -1,0 +1,5 @@
+[external]
+build-requires = [
+  "virtual:compiler/c",
+  "virtual:compiler/rust",
+]

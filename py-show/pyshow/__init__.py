@@ -68,10 +68,12 @@ package_mapping['arch'] = {
 package_mapping['fedora'].update({
     'pkg:generic/cmake': unidict('cmake'),
     'pkg:generic/freetype': devel_dict('freetype'),
+    'pkg:generic/gmp': devel_dict('gmp'),
     'pkg:generic/lcms2': devel_dict('lcms2'),
     'pkg:generic/libffi': devel_dict('libffi'),
     'pkg:generic/libimagequant': devel_dict('libimagequant'),
     'pkg:generic/libjpeg': devel_dict('libjpeg-turbo'),
+    'pkg:generic/libpq': devel_dict('libpq'),
     'pkg:generic/libraqm': devel_dict('libraqm'),
     'pkg:generic/libtiff': devel_dict('libtiff'),
     'pkg:generic/libxcb': devel_dict('libxcb'),
@@ -93,10 +95,12 @@ package_mapping['fedora'].update({
 package_mapping['arch'].update({
     'pkg:generic/cmake': unidict('cmake'),
     'pkg:generic/freetype': unidict('freetype2'),
+    'pkg:generic/gmp': unidict('gmp'),
     'pkg:generic/lcms2': unidict('lcms2'),
     'pkg:generic/libffi': unidict('libffi'),
     'pkg:generic/libimagequant': unidict('libimagequant'),
     'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
+    'pkg:generic/libpq': unidict('postgresql-libs'),
     'pkg:generic/libraqm': unidict('libraqm'),
     'pkg:generic/libtiff': unidict('libtiff4'),  # separate in Arch, libtiff exists too
     'pkg:generic/libxcb': unidict('libxcb'),
