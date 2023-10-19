@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   with_external_metadata:
-    if: "github.repository == 'rgommers/external-deps-build'"
+    if: false #"github.repository == 'rgommers/external-deps-build'"
     strategy:
       fail-fast: false
       matrix:
@@ -144,4 +144,78 @@ jobs:
             source venv/bin/activate
           fi
 
+          python -c "import ${{ matrix.pkgdata[1] }}"
+
+  windows:
+    if: "github.repository == 'rgommers/external-deps-build'"
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          # [container image name, display-name, use-external]
+          - [windows-2022, "conda-forge", true]
+        pkgdata:
+          # [package-name, import-name]
+          #- [cryptography, cryptography]
+          - [markupsafe, markupsafe]
+    runs-on: window-2019
+    name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - name: Setup Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        with:
+          python-version: '3.11'
+
+      - name: Install package manager
+        run: |
+          # We use a conda env only to install *non-Python* dependencies, not Python itself
+          Invoke-Webrequest -URI https://micro.mamba.pm/api/micromamba/win-64/latest -OutFile micromamba.tar.bz2
+          tar xf micromamba.tar.bz2
+
+          MOVE -Force Library\bin\micromamba.exe micromamba.exe
+          .\micromamba.exe --help
+
+          # You can use e.g. $HOME\micromambaenv as your base prefix
+          $Env:MAMBA_ROOT_PREFIX="C:\Your\Root\Prefix"
+
+          # Invoke the hook
+          .\micromamba.exe shell hook -s powershell | Out-String | Invoke-Expression
+
+      - name: Download and patch sdist
+        if: ${{ matrix.platform[2] }}
+        run: |
+          .\micromamba.exe activate cfenv
+          python -m venv venv
+          venv\Scripts\Activate.ps1
+
+          python -m pip install pypi_json distro typer rich
+          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+
+      - name: Install external dependencies
+        if: ${{ matrix.platform[2] }}
+        run: |
+          .\micromamba.exe activate cfenv
+          venv\Scripts\Activate.ps1
+
+          name=${{ matrix.pkgdata[0] }}
+
+          # `py-show` is not a package yet, so run it directly from __init__.py
+          python py-show/pyshow/__init__.py --package-manager=micromamba --external $name
+          python py-show/pyshow/__init__.py --package-manager=micromamba --external --system-install-cmd $name
+          # TODO: pipe in the result
+
+      - name: Build from sdist
+        if: ${{ matrix.platform[2] }}
+        run: |
+          .\micromamba.exe activate cfenv
+          venv\Scripts\Activate.ps1
+
+          # Dependencies may be installed from wheels, the target package from sdist
+          python -m pip install sdist/amended_sdist.tar.gz -v
+
+      - name: Import installed package
+        run: |
+          venv\Scripts\Activate.ps1
           python -c "import ${{ matrix.pkgdata[1] }}"
