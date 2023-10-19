@@ -1,0 +1,15 @@
+# Contributing guidelines
+
+The main purpose of the code and content in this repository is to experiment
+with the design of PEP 725 and potential follow-up work around a name mapping
+mechanism for PyPI/Python. The code is therefore "research quality" rather than
+production-quality. When considering a contribution to this repository, please
+consider the following guidelines:
+
+- Questions, comments, bug reports regarding the methodology or implementation
+  of it and new feature suggestions are very welcome - please feel free to open
+  a new issue.
+- Before opening a pull request with nontrivial changes to the current code,
+  please open an issue to discuss first.
+- Please refrain from pull requests that deal with stylistic and non-critical
+  code quality issues.
