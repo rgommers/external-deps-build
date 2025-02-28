@@ -304,6 +304,9 @@ def main(package_name: str,
         print(f"{install_cmd} {_deps}")
 
 
+def entry_point():
+    typer.run(main)
+
 
 if __name__ == '__main__':
-    typer.run(main)
+    entry_point()
