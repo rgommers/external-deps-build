@@ -33,6 +33,55 @@ def get_remote_mapping(ecosystem: str) -> dict:
     return r.json()
 
 
+@cache
+def get_remote_registry() -> dict:
+    r = requests.get(
+        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+        "refs/heads/main/data/registry.json"
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+@cache
+def get_purls_by_type() -> dict:
+    definitions = get_remote_registry()["definitions"]
+    canonical, non_canonical = [], []
+    for d in definitions:
+        if provides := d.get("provides"):
+            if isinstance(provides, str):
+                provides = [provides]
+            if any(item.startswith("pkg:") for item in provides):
+                non_canonical.append(d["id"])
+            else:
+                canonical.append(d["id"])
+        else:
+            canonical.append(d["id"])
+    
+    return {
+        "canonical": set(canonical),
+        "non-canonical": set(non_canonical),
+        "all": set(canonical + non_canonical),
+    }
+
+
+def validate_purl(purl):
+    purls = get_purls_by_type()
+    if purl not in purls["all"]:
+        raise warnings.warn(f"PURL {purl} is not recognized in the central registry.")
+    if purl not in purls["canonical"]:
+        for d in get_remote_registry()["definitions"]:
+            if purl == d["id"] and d.get("provides"):
+                references = ", ".join(d["provides"])
+                break
+        else:
+            references = None
+        msg = f"PURL {purl} is not using a canonical reference."
+        if references:
+            msg += f" Try with one of: {references}."
+        warnings.warn(msg)
+    
+
 def get_specs(mapping, purl: str) -> dict[str, list[str]]:
     "Return the first result in the mapping, for now"
     specs = None
@@ -177,6 +226,7 @@ def get_python_dev(distro_name) -> list[str]:
 
 def main(package_name: str,
     external: Annotated[bool, typer.Option(help="Show external dependencies for package")] = False,
+    validate: Annotated[bool, typer.Option(help="Validate external dependencies against central registry")] = False,
     system_install_cmd: Annotated[bool, typer.Option(
         help="Show install command with system package manager for `--pypi` and/or "
              "`--external` dependencies")] = False,
@@ -186,7 +236,10 @@ def main(package_name: str,
     py-show: inspecting package dependencies
     """
     if external:
-        parse_external(package_name, show=not system_install_cmd)
+        purls = parse_external(package_name, show=not system_install_cmd)
+        if purls and validate:
+            for purl in purls:
+                validate_purl(purl)
 
     distro_name = None
     if package_manager:
