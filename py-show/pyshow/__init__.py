@@ -19,6 +19,7 @@ package_manager = {
     'fedora': 'dnf',
     'ubuntu': 'apt-get',
     'conda-forge': 'mamba',
+    'darwin': 'brew'
 }
 
 
@@ -191,8 +192,13 @@ def main(package_name: str,
     if package_manager:
         if package_manager in ('conda', 'mamba', 'micromamba'):
             distro_name = 'conda-forge'
+        elif package_manager == 'brew':
+            distro_name = 'homebrew'
     else:
         package_manager = get_package_manager()
+        distro_name = get_distro()
+        if distro_name == 'darwin':
+            distro_name = 'homebrew'
 
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
