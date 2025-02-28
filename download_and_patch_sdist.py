@@ -57,9 +57,9 @@ def append_external_metadata(fname_sdist, package_name):
             f.write(f2.read())
 
 
-def create_new_sdist(sdist_name, sdist_dir):
+def create_new_sdist(sdist_name, sdist_dir, amended_dir):
     dirname = sdist_name.split('.tar.gz')[0]
-    with tarfile.open(sdist_dir / 'amended_sdist.tar.gz', "w:gz") as tar:
+    with tarfile.open(amended_dir / sdist_name, "w:gz") as tar:
             tar.add(sdist_dir / dirname, arcname=dirname)
 
 
@@ -70,10 +70,11 @@ if __name__ == '__main__':
 
     package_name = args.package_name
 
-    sdist_dir = Path('./sdist')
-    sdist_dir.mkdir(exist_ok=True)
+    amended_dir = Path('./sdist/_amended')
+    amended_dir.mkdir(exist_ok=True, parents=True)
+    sdist_dir = amended_dir.parent
 
     fname_sdist = download_sdist(package_name, sdist_dir)
     fname_pyproject_toml = untar_sdist(fname_sdist, sdist_dir)
     append_external_metadata(fname_pyproject_toml, package_name)
-    create_new_sdist(fname_sdist, sdist_dir)
+    create_new_sdist(fname_sdist, sdist_dir, amended_dir)
