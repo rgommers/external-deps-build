@@ -204,6 +204,8 @@ def main(package_name: str,
         else:
             raise ValueError(f"Ecosystem {distro_name} has no package manager named {package_manager}")
         external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name)
+        # Deduplicate in-place
+        external_deps = list(dict.fromkeys(external_deps))
         print(shlex.join(install_command + external_deps))
 
 
