@@ -21,6 +21,7 @@ package_manager = {
     'conda-forge': 'mamba',
     'darwin': 'brew'
 }
+package_manager_to_distro = {v: k for k, v in package_manager.items()}
 
 
 @cache
@@ -98,10 +99,11 @@ def get_specs(mapping, purl: str) -> dict[str, list[str]]:
         raise ValueError(f"Didn't find purl '{purl}' in mapping '{mapping}'")
     elif isinstance(specs, str):
         specs = {"build": [specs], "host": [specs], "run": [specs]}
-    elif hasattr(specs, "items"): # assert all fields are present
-        specs.setdefault("build", [])
-        specs.setdefault("host", [])
-        specs.setdefault("run", [])
+    elif hasattr(specs, "items"): # assert all fields are present as lists
+        for key in "build", "host", "run":
+            specs.setdefault(key, [])
+            if isinstance(specs[key], str):
+                specs[key] = [specs[key]]
     else: # list
         specs = {"build": specs, "host": specs, "run": specs}
     return specs
@@ -247,6 +249,8 @@ def main(package_name: str,
             distro_name = 'conda-forge'
         elif package_manager == 'brew':
             distro_name = 'homebrew'
+        else:
+            distro_name = package_manager_to_distro[package_manager]
     else:
         package_manager = get_package_manager()
         distro_name = get_distro()
