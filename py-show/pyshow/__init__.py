@@ -9,20 +9,17 @@ from typing import Annotated
 import distro
 import typer
 from rich import print
-from external_metadata_mappings import Registry, Mapping
+from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
 HERE = Path(__file__).parent
 
-# This should be a registration mechanism - it's here now for demo purposes.
-package_manager = {
-    'arch': 'pacman',
-    'fedora': 'dnf',
-    'ubuntu': 'apt-get',
-    'conda-forge': 'mamba',
-    'darwin': 'brew'
-}
-package_manager_to_distro = {v: k for k, v in package_manager.items()}
+@cache
+def get_known_ecosystems() -> Mapping:
+    return Ecosystems.from_url(
+        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+        "refs/heads/main/data/known-ecosystems.json"
+    )
 
 
 @cache
@@ -81,14 +78,12 @@ def get_distro():
         if name in package_manager.keys():
             return name
 
+    if name == 'darwin':
+        return 'homebrew'
+
     warnings.warn(f'No support for distro {distro.id()} yet!')
     # FIXME
     return 'fedora'
-
-
-def get_package_manager():
-    name = get_distro()
-    return package_manager[name]
     
 
 def print_toml_key(key, table):
@@ -176,6 +171,16 @@ def get_python_dev(distro_name) -> list[str]:
     return next(iter(_mapping.iter_by_id('pkg:generic/python')))['specs']['build']
 
 
+# This should be a registration mechanism - it's here now for demo purposes.
+package_manager = {
+    'arch': 'pacman',
+    'fedora': 'dnf',
+    'ubuntu': 'apt-get',
+    'conda-forge': 'mamba',
+    'darwin': 'brew'
+}
+package_manager_to_distro = {v: k for k, v in package_manager.items()}
+
 def main(package_name: str,
     external: Annotated[bool, typer.Option(help="Show external dependencies for package")] = False,
     validate: Annotated[bool, typer.Option(help="Validate external dependencies against central registry")] = False,
@@ -193,19 +198,16 @@ def main(package_name: str,
             for purl in purls:
                 validate_purl(purl)
 
-    distro_name = None
+    ecosystems = get_known_ecosystems()
     if package_manager:
-        if package_manager in ('conda', 'mamba', 'micromamba'):
-            distro_name = 'conda-forge'
-        elif package_manager == 'brew':
-            distro_name = 'homebrew'
-        else:
-            distro_name = package_manager_to_distro[package_manager]
+        for name, details in ecosystems["ecosystems"].items():
+            if package_manager in details["package_managers"]:
+                distro_name = name
+                break
     else:
-        package_manager = get_package_manager()
         distro_name = get_distro()
-        if distro_name == 'darwin':
-            distro_name = 'homebrew'
+        package_manager = ecosystems[distro_name]["package_managers"][0]
+
 
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
