@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Annotated
 
 import distro
-import requests
 import typer
 from rich import print
+from external_metadata_mappings import Registry, Mapping
+
 
 HERE = Path(__file__).parent
 
@@ -25,55 +26,30 @@ package_manager_to_distro = {v: k for k, v in package_manager.items()}
 
 
 @cache
-def get_remote_mapping(ecosystem: str) -> dict:
-    r = requests.get(
+def get_remote_mapping(ecosystem: str) -> Mapping:
+    return Mapping.from_url(
         "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
         f"refs/heads/main/data/{ecosystem}.mapping.json"
     )
-    r.raise_for_status()
-    return r.json()
 
 
 @cache
-def get_remote_registry() -> dict:
-    r = requests.get(
+def get_remote_registry() -> Registry:
+    return Registry.from_url(
         "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
         "refs/heads/main/data/registry.json"
     )
-    r.raise_for_status()
-    return r.json()
-
-
-@cache
-def get_purls_by_type() -> dict:
-    definitions = get_remote_registry()["definitions"]
-    canonical, non_canonical = [], []
-    for d in definitions:
-        if provides := d.get("provides"):
-            if isinstance(provides, str):
-                provides = [provides]
-            if any(item.startswith("pkg:") for item in provides):
-                non_canonical.append(d["id"])
-            else:
-                canonical.append(d["id"])
-        else:
-            canonical.append(d["id"])
-    
-    return {
-        "canonical": set(canonical),
-        "non-canonical": set(non_canonical),
-        "all": set(canonical + non_canonical),
-    }
 
 
 def validate_purl(purl):
-    purls = get_purls_by_type()
-    if purl not in purls["all"]:
+    reg = get_remote_registry()
+    if purl not in reg.iter_unique_purls():
         raise warnings.warn(f"PURL {purl} is not recognized in the central registry.")
-    if purl not in purls["canonical"]:
-        for d in get_remote_registry()["definitions"]:
-            if purl == d["id"] and d.get("provides"):
-                references = ", ".join(d["provides"])
+    canonical = {item["id"] for item in reg.iter_canonical()}
+    if purl not in canonical:
+        for d in reg.iter_by_id(purl):
+            if provides := d.get("provides"):
+                references = ", ".join(provides)
                 break
         else:
             references = None
@@ -81,32 +57,6 @@ def validate_purl(purl):
         if references:
             msg += f" Try with one of: {references}."
         warnings.warn(msg)
-    
-
-def get_specs(mapping, purl: str) -> dict[str, list[str]]:
-    "Return the first result in the mapping, for now"
-    specs = None
-    for m in mapping.get("mappings", ()):
-        if m["id"] == purl:
-            if specs := m.get("specs"):
-                specs = specs
-                break
-            elif specs_from := m.get("specs_from"):
-                return get_specs(mapping, specs_from)
-            else:
-                raise ValueError("'specs' or 'specs_from' are required")
-    if not specs:
-        raise ValueError(f"Didn't find purl '{purl}' in mapping '{mapping}'")
-    elif isinstance(specs, str):
-        specs = {"build": [specs], "host": [specs], "run": [specs]}
-    elif hasattr(specs, "items"): # assert all fields are present as lists
-        for key in "build", "host", "run":
-            specs.setdefault(key, [])
-            if isinstance(specs[key], str):
-                specs[key] = [specs[key]]
-    else: # list
-        specs = {"build": specs, "host": specs, "run": specs}
-    return specs
 
 
 def read_pyproject(package_name: str):
@@ -181,7 +131,7 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
     if not apply_mapping:
         all_deps = external_build_deps.copy()
         all_deps.extend(external_run_deps)
-        return all_deps
+        return list(dict.fromkeys(all_deps))
     else:
         if distro_name is None:
             distro_name = get_distro()
@@ -189,14 +139,14 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
         _mapped_deps = []
         for dep in external_build_deps:
             try:
-                _mapped_deps.extend(get_specs(_mapping, dep)['build'])
-                _mapped_deps.extend(get_specs(_mapping, dep)['host'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['build'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['host'])
             except KeyError:
                 raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!")
         
         for dep in external_run_deps:
             try:
-                _mapped_deps.extend(get_specs(_mapping, dep)['run'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['run'])
             except KeyError:
                 raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
@@ -206,7 +156,7 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
             # default Python version of the distro.
             _mapped_deps.extend(get_python_dev(distro_name))
 
-        return _mapped_deps
+        return list(dict.fromkeys(_mapped_deps))
 
 
 def _uses_c_cpp_compiler(external_build_deps: list[str]) -> bool:
@@ -223,7 +173,7 @@ def get_python_dev(distro_name) -> list[str]:
     build Python extension modules.
     """
     _mapping = get_remote_mapping(distro_name)
-    return get_specs(_mapping, 'pkg:generic/python')['build']
+    return next(iter(_mapping.iter_by_id('pkg:generic/python')))['specs']['build']
 
 
 def main(package_name: str,
@@ -259,17 +209,10 @@ def main(package_name: str,
 
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
-        install_command = []
-        for mgr in mapping["package_managers"]:
-            if mgr["name"] == package_manager:
-                install_command = mgr["install_command"]
-                break
-        else:
-            raise ValueError(f"Ecosystem {distro_name} has no package manager named {package_manager}")
+        package_manager = mapping.get_package_manager(package_manager)
         external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name)
-        # Deduplicate in-place
-        external_deps = list(dict.fromkeys(external_deps))
-        print(shlex.join(install_command + external_deps))
+        cmd = mapping.build_install_command(package_manager["install_command"], external_deps)
+        print(shlex.join(cmd))
 
 
 def entry_point():

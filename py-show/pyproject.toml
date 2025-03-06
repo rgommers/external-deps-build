@@ -29,7 +29,8 @@ dependencies = [
   "distro",
   "rich",
   "typer",
-  "requests"
+  "requests",
+  "external_metadata_mappings @ https://github.com/jaimergp/external-metadata-mappings/archive/main.tar.gz"
 ]
 
 [project.urls]
@@ -51,3 +52,6 @@ py-show = "cd \"$PIXI_PROJECT_ROOT/..\" && py-show"
 
 [tool.ruff]
 line-length = 99
+
+[tool.hatch.metadata]
+allow-direct-references = true
