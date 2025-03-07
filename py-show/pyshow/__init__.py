@@ -213,7 +213,7 @@ def main(package_name: str,
         mapping = get_remote_mapping(distro_name)
         package_manager = mapping.get_package_manager(package_manager)
         external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name)
-        cmd = mapping.build_install_command(package_manager["install_command"], external_deps)
+        cmd = mapping.build_install_command(package_manager, external_deps)
         print(shlex.join(cmd))
 
 
