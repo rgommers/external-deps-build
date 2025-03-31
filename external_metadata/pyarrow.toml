@@ -7,6 +7,8 @@ build-requires = [
 
 host-requires = [
   "pkg:github/apache/arrow",
+  "pkg:github/generic/zlib",
+  "pkg:github/generic/llvm",
 ]
 
 # PyArrow has many optional dependencies (see `PYARROW_WITH_*` env vars in

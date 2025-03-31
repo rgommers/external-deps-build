@@ -106,7 +106,9 @@ package_mapping['fedora'].update({
                                     build=['libarrow', 'libarrow-devel', 'libarrow-dataset-libs', 'libarrow-dataset-devel']),
     'pkg:generic/arrow': dict(run=['libarrow', 'libarrow-dataset'],
                               build=['libarrow', 'libarrow-devel', 'libarrow-dataset', 'libarrow-dataset-devel']),
+    'pkg:generic/llvm': devel_dict('llvm'),
 })
+
 package_mapping['arch'].update({
     'pkg:generic/cmake': unidict('cmake'),
     'pkg:generic/freetype': unidict('freetype2'),
@@ -133,6 +135,7 @@ package_mapping['arch'].update({
     'pkg:generic/zlib': unidict('zlib'),
     'pkg:github/apache/arrow': unidict('arrow'),
     'pkg:generic/arrow': unidict('arrow'),
+    'pkg:generic/llvm': unidict('llvm'),
 })
 package_mapping['conda-forge'].update({
     'pkg:generic/cmake': unidict('cmake'),
@@ -160,6 +163,7 @@ package_mapping['conda-forge'].update({
     'pkg:generic/zlib': unidict('zlib'),
     'pkg:github/apache/arrow': unidict('libarrow-all'),
     'pkg:generic/arrow': unidict('libarrow-all'),
+    'pkg:generic/llvm': unidict('llvm'),
 })
 
 
