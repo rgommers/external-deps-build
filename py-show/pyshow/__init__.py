@@ -102,8 +102,10 @@ package_mapping['fedora'].update({
     'pkg:generic/python': devel_dict('python'),
     'pkg:generic/tk': devel_dict('tk'),
     'pkg:generic/zlib': devel_dict('zlib'),
-    'pkg:github/apache/arrow': devel_dict('libarrow'),
-    'pkg:generic/arrow': devel_dict('libarrow'),
+    'pkg:github/apache/arrow': dict(run=['libarrow', 'libarrow-dataset-libs'],
+                                    build=['libarrow', 'libarrow-devel', 'libarrow-dataset-libs', 'libarrow-dataset-devel']),
+    'pkg:generic/arrow': dict(run=['libarrow', 'libarrow-dataset'],
+                              build=['libarrow', 'libarrow-devel', 'libarrow-dataset', 'libarrow-dataset-devel']),
 })
 package_mapping['arch'].update({
     'pkg:generic/cmake': unidict('cmake'),
