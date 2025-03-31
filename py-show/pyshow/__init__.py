@@ -158,8 +158,8 @@ package_mapping['conda-forge'].update({
     'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
     'pkg:generic/tk': unidict('tk'),
     'pkg:generic/zlib': unidict('zlib'),
-    'pkg:github/apache/arrow': unidict('libarrow'),
-    'pkg:generic/arrow': unidict('libarrow'),
+    'pkg:github/apache/arrow': unidict('libarrow-all'),
+    'pkg:generic/arrow': unidict('libarrow-all'),
 })
 
 
