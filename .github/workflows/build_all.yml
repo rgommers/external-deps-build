@@ -24,8 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          #- ["archlinux:latest", "Arch"]
-          #- ["fedora:39", "Fedora"]
+          - ["archlinux:latest", "Arch"]
+          - ["fedora:39", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
         pkgdata:
           - [cryptography, cryptography]
@@ -43,9 +43,8 @@ jobs:
             pacman -Syu python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            #~/.local/bin/micromamba shell init -s bash -p ~/micromamba
             source ~/.bashrc
-            #cp .mambarc ~/.mambarc
+            cp .mambarc ~/.mambarc
             micromamba create -n cfenv python pip  # will install 3.12
           fi
 
@@ -169,7 +168,6 @@ jobs:
             pacman -Syu python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            ~/.local/bin/micromamba shell init -s bash -p ~/micromamba
             source ~/.bashrc
             cp .mambarc ~/.mambarc
             micromamba create -n cfenv python pip  # will install 3.12
