@@ -1,6 +1,9 @@
 name: Build wheels
 
 on:
+  push:
+    branches:
+      - ci-triggers
   pull_request:
     branches:
       - main
