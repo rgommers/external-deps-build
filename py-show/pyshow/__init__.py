@@ -1,168 +1,63 @@
+import shlex
 import tarfile
 import tomllib
-from typing import Annotated
 import warnings
+from functools import cache
+from pathlib import Path
+from typing import Annotated
 
 import distro
-from rich import print
 import typer
+from rich import print
+from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
-# This should be a registration mechanism - it's here now for demo purposes.
-package_manager = {
-    'arch': 'pacman',
-    'fedora': 'dnf',
-    'ubuntu': 'apt-get',
-    'conda-forge': 'mamba',
-}
+HERE = Path(__file__).parent
 
-# TODO: the --yes/--noconfirm should be made opt-in (only good default for CI testing)
-package_mgr_install_commands = {
-    'apt-get': 'sudo apt-get install --yes',
-    'dnf': 'sudo dnf install -y',
-    'pacman': 'sudo pacman -Syu --noconfirm',
-    'micromamba': 'micromamba install --yes',
-    'mamba': 'mamba install --yes',
-    'conda': 'conda install --yes',
-}
-
-# For `rust` virtual package: make that provide `rustc` and `cargo`? Different
-# across distros, e.g. Fedora install only `rustc` for the `rust` package,
-# while Arch installs both of those.
-
-def unidict(deps: str | list[str]) -> dict[str, list[str]]:
-    """Use when build and run dependencies are the same"""
-    if type(deps) == str:
-        deps = [deps]
-    return dict(build=deps, run=deps)
+@cache
+def get_known_ecosystems() -> Mapping:
+    return Ecosystems.from_url(
+        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+        "refs/heads/main/data/known-ecosystems.json"
+    )
 
 
-def devel_dict(deps: str | list[str]) -> dict[str, list[str]]:
-    """Use when build dep equals run dependencies plus `-devel`"""
-    if type(deps) == str:
-        deps = [deps]
-
-    #build_deps = deps.copy()
-    #build_deps.extend([s+'-devel' for s in deps])
-    #return dict(run=deps, build=build_deps)
-    return dict(run=deps, build=[s+'-devel' for s in deps])
+@cache
+def get_remote_mapping(ecosystem: str) -> Mapping:
+    return Mapping.from_url(
+        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+        f"refs/heads/main/data/{ecosystem}.mapping.json"
+    )
 
 
-# For external dependencies; for Python/PyPI ones we will make use of existing
-# metadata files that distros already have.
-package_mapping = {}
-package_mapping['fedora'] = {
-    'virtual:compiler/c': unidict('gcc'),
-    'virtual:compiler/cpp': unidict('gcc-c++'),
-    'virtual:compiler/fortran': unidict('gcc-gfortran'),
-    'virtual:compiler/rust': unidict(['rust', 'cargo']),
-    'virtual:interface/blas': devel_dict('flexiblas'),
-    'virtual:interface/lapack': devel_dict('flexiblas'),
-}
-
-package_mapping['arch'] = {
-    'virtual:compiler/c': unidict('gcc'),
-    'virtual:compiler/cpp': unidict('gcc'),
-    'virtual:compiler/fortran': unidict('gcc-fortran'),
-    'virtual:compiler/rust': unidict('rust'),
-    'virtual:interface/blas': unidict('openblas'),
-    'virtual:interface/lapack': unidict('openblas'),
-}
-
-package_mapping['conda-forge'] = {
-    'virtual:compiler/c': unidict('c-compiler'),
-    'virtual:compiler/cpp': unidict('cxx-compiler'),
-    'virtual:compiler/fortran': unidict('fortran-compiler'),
-    'virtual:compiler/rust': unidict('rust'),
-    'virtual:interface/blas': unidict('blas'),
-    'virtual:interface/lapack': dict(run=['lapack'], build=['lapack', 'blas-devel']),
-}
-
-package_mapping['fedora'].update({
-    'pkg:generic/cmake': unidict('cmake'),
-    'pkg:generic/freetype': devel_dict('freetype'),
-    'pkg:generic/gmp': devel_dict('gmp'),
-    'pkg:generic/lcms2': devel_dict('lcms2'),
-    'pkg:generic/libffi': devel_dict('libffi'),
-    'pkg:generic/libimagequant': devel_dict('libimagequant'),
-    'pkg:generic/libjpeg': devel_dict('libjpeg-turbo'),
-    'pkg:generic/libpq': devel_dict('libpq'),
-    'pkg:generic/libraqm': devel_dict('libraqm'),
-    'pkg:generic/libtiff': devel_dict('libtiff'),
-    'pkg:generic/libxcb': devel_dict('libxcb'),
-    'pkg:generic/libxml2': devel_dict('libxml2'),
-    'pkg:generic/libxslt': devel_dict('libxslt'),
-    'pkg:generic/libyaml': devel_dict('libyaml'),
-    'pkg:generic/libwebp': devel_dict('libwebp'),
-    'pkg:generic/make': devel_dict('make'),
-    'pkg:generic/ninja': unidict('ninja-build'),
-    'pkg:generic/openjpeg': devel_dict('openjpeg2'),
-    'pkg:generic/openssl': devel_dict('openssl'),
-    'pkg:generic/pkg-config': unidict('pkgconfig'),
-    'pkg:generic/python': devel_dict('python'),
-    'pkg:generic/tk': devel_dict('tk'),
-    'pkg:generic/zlib': devel_dict('zlib'),
-    'pkg:github/apache/arrow': devel_dict('libarrow'),
-    'pkg:generic/arrow': devel_dict('libarrow'),
-})
-package_mapping['arch'].update({
-    'pkg:generic/cmake': unidict('cmake'),
-    'pkg:generic/freetype': unidict('freetype2'),
-    'pkg:generic/gmp': unidict('gmp'),
-    'pkg:generic/lcms2': unidict('lcms2'),
-    'pkg:generic/libffi': unidict('libffi'),
-    'pkg:generic/libimagequant': unidict('libimagequant'),
-    'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
-    'pkg:generic/libpq': unidict('postgresql-libs'),
-    'pkg:generic/libraqm': unidict('libraqm'),
-    'pkg:generic/libtiff': unidict('libtiff4'),  # separate in Arch, libtiff exists too
-    'pkg:generic/libxcb': unidict('libxcb'),
-    'pkg:generic/libxml2': unidict('libxml2'),
-    'pkg:generic/libxslt': unidict('libxslt'),
-    'pkg:generic/libyaml': unidict('libyaml'),
-    'pkg:generic/libwebp': unidict('libwebp'),
-    'pkg:generic/make': unidict('make'),
-    'pkg:generic/ninja': unidict('ninja'),
-    'pkg:generic/openjpeg': unidict('openjpeg2'),
-    'pkg:generic/openssl': unidict('openssl'),
-    'pkg:generic/pkg-config': unidict('pkgconf'),
-    'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
-    'pkg:generic/tk': unidict('tk'),
-    'pkg:generic/zlib': unidict('zlib'),
-    'pkg:github/apache/arrow': unidict('arrow'),
-    'pkg:generic/arrow': unidict('arrow'),
-})
-package_mapping['conda-forge'].update({
-    'pkg:generic/cmake': unidict('cmake'),
-    'pkg:generic/freetype': unidict('freetype'),
-    'pkg:generic/gmp': unidict('gmp'),
-    'pkg:generic/lcms2': unidict('lcms2'),
-    'pkg:generic/libffi': unidict('libffi'),
-    'pkg:generic/libimagequant': unidict('libimagequant'),
-    'pkg:generic/libjpeg': unidict('libjpeg-turbo'),
-    'pkg:generic/libpq': unidict('libpq'),
-    'pkg:generic/libraqm': dict(run=[], build=[]), # not available, should warn if in optional, raise otherwise?
-    'pkg:generic/libtiff': unidict('libtiff'),
-    'pkg:generic/libxcb': unidict('libxcb'),
-    'pkg:generic/libxml2': unidict('libxml2'),
-    'pkg:generic/libxslt': unidict('libxslt'),
-    'pkg:generic/libyaml': unidict('yaml'),
-    'pkg:generic/libwebp': unidict('libwebp'),
-    'pkg:generic/make': unidict('make'),
-    'pkg:generic/ninja': unidict('ninja'),
-    'pkg:generic/openjpeg': unidict('openjpeg'),
-    'pkg:generic/openssl': unidict('openssl'),
-    'pkg:generic/pkg-config': unidict('pkg-config'),
-    'pkg:generic/python': dict(run=['python'], build=[]),  # python already installed, no separate -dev package
-    'pkg:generic/tk': unidict('tk'),
-    'pkg:generic/zlib': unidict('zlib'),
-    'pkg:github/apache/arrow': unidict('libarrow'),
-    'pkg:generic/arrow': unidict('libarrow'),
-})
+@cache
+def get_remote_registry() -> Registry:
+    return Registry.from_url(
+        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+        "refs/heads/main/data/registry.json"
+    )
 
 
+def validate_purl(purl):
+    reg = get_remote_registry()
+    if purl not in reg.iter_unique_purls():
+        raise warnings.warn(f"PURL {purl} is not recognized in the central registry.")
+    canonical = {item["id"] for item in reg.iter_canonical()}
+    if purl not in canonical:
+        for d in reg.iter_by_id(purl):
+            if provides := d.get("provides"):
+                references = ", ".join(provides)
+                break
+        else:
+            references = None
+        msg = f"PURL {purl} is not using a canonical reference."
+        if references:
+            msg += f" Try with one of: {references}."
+        warnings.warn(msg)
 
-def read_pyproject(fname_sdist='./sdist/amended_sdist.tar.gz'):
+
+def read_pyproject(package_name: str):
+    fname_sdist = sorted((HERE / "../../sdist/_amended/").glob(f"{package_name}-*.tar.gz"))[-1]
     with tarfile.open(fname_sdist) as tar:
         fileobj_toml = None
         for info in tar.getmembers():
@@ -172,7 +67,7 @@ def read_pyproject(fname_sdist='./sdist/amended_sdist.tar.gz'):
                 break
 
         if fileobj_toml is None:
-            raise ValueError(f"Could not read pyproject.toml file from sdist")
+            raise ValueError("Could not read pyproject.toml file from sdist")
         
         tomldata = tomllib.load(fileobj_toml)
     return tomldata
@@ -183,14 +78,12 @@ def get_distro():
         if name in package_manager.keys():
             return name
 
+    if name == 'darwin':
+        return 'homebrew'
+
     warnings.warn(f'No support for distro {distro.id()} yet!')
     # FIXME
     return 'fedora'
-
-
-def get_package_manager():
-    name = get_distro()
-    return package_manager[name]
     
 
 def print_toml_key(key, table):
@@ -206,12 +99,12 @@ def print_toml_key(key, table):
                     print(f'[bright_black]    {item}[/]')
 
 
-def parse_external(show: bool = False, apply_mapping: bool = False,
+def parse_external(package_name: str, show: bool = False, apply_mapping: bool = False,
                    distro_name: str = None) -> list[str]:
     """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
     external_run_deps = []
-    toml = read_pyproject()
+    toml = read_pyproject(package_name)
     if 'external' in toml:
         external = toml['external']
         for key in ('build-requires', 'host-requires', 'dependencies'):
@@ -233,23 +126,24 @@ def parse_external(show: bool = False, apply_mapping: bool = False,
     if not apply_mapping:
         all_deps = external_build_deps.copy()
         all_deps.extend(external_run_deps)
-        return all_deps
+        return list(dict.fromkeys(all_deps))
     else:
         if distro_name is None:
             distro_name = get_distro()
-        _mapping = package_mapping[distro_name]
+        _mapping = get_remote_mapping(distro_name)
         _mapped_deps = []
         for dep in external_build_deps:
             try:
-                _mapped_deps.extend(_mapping[dep]['build'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['build'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['host'])
             except KeyError:
-                raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
+                raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!")
         
         for dep in external_run_deps:
             try:
-                _mapped_deps.extend(_mapping[dep]['run'])
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['run'])
             except KeyError:
-                raise ValueError(f"Mapping entry for external dependency `{dep}` missing!")
+                raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
         if _uses_c_cpp_compiler(external_build_deps):
             # TODO: handling of non-default Python installs isn't done here,
@@ -257,7 +151,7 @@ def parse_external(show: bool = False, apply_mapping: bool = False,
             # default Python version of the distro.
             _mapped_deps.extend(get_python_dev(distro_name))
 
-        return _mapped_deps
+        return list(dict.fromkeys(_mapped_deps))
 
 
 def _uses_c_cpp_compiler(external_build_deps: list[str]) -> bool:
@@ -273,12 +167,23 @@ def get_python_dev(distro_name) -> list[str]:
     This is an implicit dependency for packages that use a C or C++ compiler to
     build Python extension modules.
     """
-    _mapping = package_mapping[distro_name]
-    return _mapping['pkg:generic/python']['build']
+    _mapping = get_remote_mapping(distro_name)
+    return next(iter(_mapping.iter_by_id('pkg:generic/python')))['specs']['build']
 
+
+# This should be a registration mechanism - it's here now for demo purposes.
+package_manager = {
+    'arch': 'pacman',
+    'fedora': 'dnf',
+    'ubuntu': 'apt-get',
+    'conda-forge': 'mamba',
+    'darwin': 'brew'
+}
+package_manager_to_distro = {v: k for k, v in package_manager.items()}
 
 def main(package_name: str,
     external: Annotated[bool, typer.Option(help="Show external dependencies for package")] = False,
+    validate: Annotated[bool, typer.Option(help="Validate external dependencies against central registry")] = False,
     system_install_cmd: Annotated[bool, typer.Option(
         help="Show install command with system package manager for `--pypi` and/or "
              "`--external` dependencies")] = False,
@@ -288,22 +193,33 @@ def main(package_name: str,
     py-show: inspecting package dependencies
     """
     if external:
-        parse_external(show=not system_install_cmd)
+        purls = parse_external(package_name, show=not system_install_cmd)
+        if purls and validate:
+            for purl in purls:
+                validate_purl(purl)
 
-    distro_name = None
+    ecosystems = get_known_ecosystems()
     if package_manager:
-        if package_manager in ('conda', 'mamba', 'micromamba'):
-            distro_name = 'conda-forge'
+        for name, details in ecosystems["ecosystems"].items():
+            if package_manager in details["package_managers"]:
+                distro_name = name
+                break
     else:
-        package_manager = get_package_manager()
+        distro_name = get_distro()
+        package_manager = ecosystems[distro_name]["package_managers"][0]
+
 
     if system_install_cmd:
-        install_cmd = package_mgr_install_commands[package_manager]
-        external_deps = parse_external(apply_mapping=True, distro_name=distro_name)
-        _deps = ' '.join(external_deps)
-        print(f"{install_cmd} {_deps}")
+        mapping = get_remote_mapping(distro_name)
+        package_manager = mapping.get_package_manager(package_manager)
+        external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name)
+        cmd = mapping.build_install_command(package_manager, external_deps)
+        print(shlex.join(cmd))
 
+
+def entry_point():
+    typer.run(main)
 
 
 if __name__ == '__main__':
-    typer.run(main)
+    entry_point()
