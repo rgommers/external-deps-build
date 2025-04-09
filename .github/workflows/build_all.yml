@@ -54,7 +54,7 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich
+          python -m pip install pypi_json distro typer rich ./py-show
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
 
       - name: Install external dependencies
@@ -69,14 +69,14 @@ jobs:
           # `py-show` is not a package yet, so define an alias
           shopt -s expand_aliases
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            alias py-show="python py-show/pyshow/__init__.py --package-manager=micromamba"
-          else
-            alias py-show="python py-show/pyshow/__init__.py"
+            pyshow_args="--package-manager=micromamba"
+            else
+            pyshow_args=""
           fi
 
-          py-show --external $name
-          py-show --external --system-install-cmd $name
-          $(py-show --external --system-install-cmd $name)
+          py-show --external $name $pyshow_args
+          py-show --external --system-install-cmd $name $pyshow_args
+          $(py-show --external --system-install-cmd $name $pyshow_args)
 
       - name: Build from sdist
         run: |
@@ -100,7 +100,7 @@ jobs:
 
   with_external_metadata:
     needs: smoketest
-    if: "github.repository == 'rgommers/external-deps-build'"
+    if: github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
