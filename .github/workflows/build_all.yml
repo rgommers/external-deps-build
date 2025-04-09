@@ -125,44 +125,44 @@ jobs:
           - ["fedora:39", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
         pkgdata:
-          # [package-name, normalized-sdist-name, import-name]
-          - [cryptography, cryptography, cryptography]
-          - [pyyaml, pyyaml, yaml]  # poor detection of libyaml, falls back to pure Python on conda-forge
-          - [lxml, lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
-          - [greenlet, greenlet, greenlet]
-          - [httptools, httptools, httptools]
-          - [markupsafe, markupsafe, markupsafe]
-          - [grpcio, grpcio, grpc]  # doesn't work, no pyproject.toml + absolute import in setup.py
-          - [sqlalchemy, sqlalchemy, sqlalchemy]
-          - [wrapt, wrapt, wrapt]
-          - [protobuf, protobuf, google.protobuf]
-          - [charset-normalizer, charset_normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
-          - [pillow, pillow, PIL]
-          - [cffi, cffi, cffi]
-          - [frozenlist, frozenlist, frozenlist]
-          - [multidict, multidict, multidict]
-          - [coverage, coverage, coverage]
-          - [yarl, yarl, yarl]
-          - [aiohttp, aiohttp, aiohttp]  # doesn't build on Python 3.12 yet
-          - [psutil, psutil, psutil]
-          - [numpy, numpy, numpy]
-          - [pandas, pandas, pandas]
-          - [scipy, scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
-          - [pyarrow, pyarrow, pyarrow]
-          - [pynacl, PyNaCl, nacl]
-          - [psycopg2-binary, psycopg2-binary, psycopg2]
-          - [rpds-py, rpds_py, rpds]
-          - [bcrypt, bcrypt, bcrypt]
-          - [scikit-learn, scikit_learn, sklearn]
-          - [msgpack, msgpack, msgpack]
-          - [matplotlib, matplotlib, matplotlib]  # Failing on conda-forge, missing Freetype symbols.
-          - [regex, regex, regex]
-          - [kiwisolver, kiwisolver, kiwisolver]
-          - [pydantic-core, pydantic_core, pydantic_core]
-          - [pyrsistent, pyrsistent, pyrsistent]
-          - [grpcio-tools, grpcio_tools, grpc]
-          - [pycryptodomex, pycryptodomex, Cryptodome]
-          - [google-crc32c, google_crc32c, google_crc32c]
+          # [package-name, import-name]
+          - [cryptography, cryptography]
+          - [pyyaml, yaml]  # poor detection of libyaml, falls back to pure Python on conda-forge
+          - [lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
+          - [greenlet, greenlet]
+          - [httptools, httptools]
+          - [markupsafe, markupsafe]
+          - [grpcio, grpc]  # doesn't work, no pyproject.toml + absolute import in setup.py
+          - [sqlalchemy, sqlalchemy]
+          - [wrapt, wrapt]
+          - [protobuf, google.protobuf]
+          - [charset-normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
+          - [pillow, PIL]
+          - [cffi, cffi]
+          - [frozenlist, frozenlist]
+          - [multidict, multidict]
+          - [coverage, coverage]
+          - [yarl, yarl]
+          - [aiohttp, aiohttp]  # doesn't build on Python 3.12 yet
+          - [psutil, psutil]
+          - [numpy, numpy]
+          - [pandas, pandas]
+          - [scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
+          - [pyarrow, pyarrow]
+          - [pynacl, nacl]
+          - [psycopg2-binary, psycopg2-psycopg2]
+          - [rpds-py, rpds]
+          - [bcrypt, bcrypt]
+          - [scikit-learn, sklearn]
+          - [msgpack, msgpack]
+          - [matplotlib, matplotlib]  # Failing on conda-forge, missing Freetype symbols.
+          - [regex, regex]
+          - [kiwisolver, kiwisolver]
+          - [pydantic-core, pydantic_core]
+          - [pyrsistent, pyrsistent]
+          - [grpcio-tools, grpc]
+          - [pycryptodomex, Cryptodome]
+          - [google-crc32c, google_crc32c]
     runs-on: ubuntu-22.04
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
@@ -227,7 +227,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/_amended/${{ matrix.pkgdata[1] }}-*.tar.gz -v
+          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
@@ -245,4 +245,4 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -c "import ${{ matrix.pkgdata[2] }}"
+          python -c "import ${{ matrix.pkgdata[1] }}"

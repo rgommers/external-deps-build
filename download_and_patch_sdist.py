@@ -59,8 +59,8 @@ def append_external_metadata(fname_sdist, package_name):
 
 def create_new_sdist(sdist_name, sdist_dir, amended_dir):
     dirname = sdist_name.split('.tar.gz')[0]
-    with tarfile.open(amended_dir / sdist_name, "w:gz") as tar:
-            tar.add(sdist_dir / dirname, arcname=dirname)
+    with tarfile.open(amended_dir / sdist_name.lower().replace("_", "-"), "w:gz") as tar:
+        tar.add(sdist_dir / dirname, arcname=dirname)
 
 
 if __name__ == '__main__':
