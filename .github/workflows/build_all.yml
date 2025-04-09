@@ -187,6 +187,8 @@ jobs:
 
           python -m pip install pypi_json distro typer rich ./py-show
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          ls -alh sdist/
+          ls -alh sdist/_amended
 
       - name: Install external dependencies
         if: ${{ matrix.platform[2] }}
@@ -216,7 +218,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/amended_sdist.tar.gz -v
+          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
