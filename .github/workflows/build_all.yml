@@ -141,7 +141,7 @@ jobs:
           - [scipy, scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
           - [pyarrow, pyarrow, pyarrow]
           - [pynacl, pynacl, nacl]
-          - [psycopg2-binary, psycopg2_binary, psycopg2]
+          - [psycopg2-binary, psycopg2-binary, psycopg2]
           - [rpds-py, rpds_py, rpds]
           - [bcrypt, bcrypt, bcrypt]
           - [scikit-learn, scikit_learn, sklearn]

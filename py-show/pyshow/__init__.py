@@ -62,12 +62,16 @@ def read_pyproject(package_name: str, sdist_dir: str | Path | None = None):
         sdist_dir = HERE / "../../sdist/_amended/"
     else:
         sdist_dir = Path(sdist_dir)
-    fname_sdist = sorted(sdist_dir.glob(f"{package_name}-*.tar.gz"))
-    if not fname_sdist:
+    fname_sdist = None
+    for name in (package_name, package_name.replace("-", "_"), package_name.replace("_", "-")):
+        tarballs = sorted(sdist_dir.glob(f"{name}-*.tar.gz"))
+        if tarballs:
+            if len(tarballs) > 1:
+                warnings.warn("More than one sdist found; choosing latest one")
+            fname_sdist = tarballs[-1]
+            break
+    if fname_sdist is None:
         raise ValueError(f"Couldn't find sdist for {package_name} at {sdist_dir}")
-    if len(fname_sdist) > 1:
-        warnings.warn("More than one sdist found; choosing latest one")
-    fname_sdist = fname_sdist[-1]
 
     with tarfile.open(fname_sdist) as tar:
         fileobj_toml = None
