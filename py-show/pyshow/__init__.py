@@ -95,7 +95,6 @@ def get_distro():
         elif name in package_manager.keys():
             return name
 
-
     warnings.warn(f'No support for distro {distro.id()} yet!')
     # FIXME
     return 'fedora'
@@ -197,6 +196,7 @@ package_manager = {
     'darwin': 'brew'
 }
 package_manager_to_distro = {v: k for k, v in package_manager.items()}
+
 
 def main(package_name: str,
     external: Annotated[bool, typer.Option(help="Show external dependencies for package")] = False,

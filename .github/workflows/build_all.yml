@@ -56,7 +56,6 @@ jobs:
 
       - name: Download and patch sdist
         run: |
-          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
@@ -71,7 +70,6 @@ jobs:
 
       - name: Install external dependencies
         run: |
-          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
@@ -90,7 +88,6 @@ jobs:
 
       - name: Build from sdist
         run: |
-          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
@@ -101,7 +98,6 @@ jobs:
 
       - name: Import installed package
         run: |
-          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
