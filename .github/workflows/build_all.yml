@@ -57,6 +57,8 @@ jobs:
 
           python -m pip install pypi_json distro typer rich ./py-show
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          ls -alh sdist/
+          ls -alh sdist/_amended
 
       - name: Install external dependencies
         run: |
@@ -70,7 +72,7 @@ jobs:
 
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             pyshow_args="--package-manager=micromamba"
-            else
+          else
             pyshow_args=""
           fi
 
