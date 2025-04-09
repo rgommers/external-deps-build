@@ -13,6 +13,15 @@ defaults:
 permissions:
   contents: read # to fetch code (actions/checkout)
 
+concurrency:
+  # Concurrency group that uses the workflow name and PR number if available
+  # or commit SHA as a fallback. If a new build is triggered under that
+  # concurrency group while a previous build is running it will be canceled.
+  # Repeated pushes to a PR will cancel all previous builds, while multiple
+  # merges to main will not cancel.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   smoketest:
     # Build only one package per distro, to avoid spinning up a ton of jobs if
@@ -140,7 +149,7 @@ jobs:
           - [pandas, pandas, pandas]
           - [scipy, scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
           - [pyarrow, pyarrow, pyarrow]
-          - [pynacl, pynacl, nacl]
+          - [pynacl, PyNaCl, nacl]
           - [psycopg2-binary, psycopg2-binary, psycopg2]
           - [rpds-py, rpds_py, rpds]
           - [bcrypt, bcrypt, bcrypt]
