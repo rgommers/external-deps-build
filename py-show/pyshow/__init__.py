@@ -206,7 +206,7 @@ def main(package_name: str,
                 break
     else:
         distro_name = get_distro()
-        package_manager = ecosystems[distro_name]["package_managers"][0]
+        package_manager = ecosystems["ecosystems"][distro_name]["package_managers"][0]
 
 
     if system_install_cmd:
