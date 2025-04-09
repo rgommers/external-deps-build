@@ -155,7 +155,7 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
 
 
 def _uses_c_cpp_compiler(external_build_deps: list[str]) -> bool:
-    for compiler in ('virtual:compiler/c', 'virtual:compiler/cpp'):
+    for compiler in ('dep:virtual/compiler/c', 'dep:virtual/compiler/cpp'):
         if compiler in external_build_deps:
             return True
     return False
@@ -168,7 +168,7 @@ def get_python_dev(distro_name) -> list[str]:
     build Python extension modules.
     """
     _mapping = get_remote_mapping(distro_name)
-    return next(iter(_mapping.iter_by_id('pkg:generic/python')))['specs']['build']
+    return next(iter(_mapping.iter_by_id('dep:generic/python')))['specs']['build']
 
 
 # This should be a registration mechanism - it's here now for demo purposes.
