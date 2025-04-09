@@ -70,10 +70,9 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
+          pyshow_args="--sdist-dir=./sdist/_amended"
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            pyshow_args="--package-manager=micromamba"
-          else
-            pyshow_args=""
+            pyshow_args+=" --package-manager=micromamba"
           fi
 
           py-show --external $name $pyshow_args
