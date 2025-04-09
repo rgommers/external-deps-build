@@ -147,17 +147,19 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
             distro_name = get_distro()
         _mapping = get_remote_mapping(distro_name)
         _mapped_deps = []
+        _registry = get_remote_registry()
         for dep in external_build_deps:
             try:
-                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['build'])
-                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['host'])
-            except (KeyError, StopIteration):
-                raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!")
-        
+                mapped_specs = next(iter(_mapping.iter_by_id(dep, resolve_alias_with_registry=_registry, only_mapped=True)))
+                _mapped_deps.extend(mapped_specs['specs']['build'])
+                _mapped_deps.extend(mapped_specs['specs']['host'])
+            except StopIteration as exc:
+                raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!") from exc
+
         for dep in external_run_deps:
             try:
-                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['run'])
-            except (KeyError, StopIteration):
+                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep, resolve_alias_with_registry=_registry)))['specs']['run'])
+            except StopIteration:
                 raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
         if _uses_c_cpp_compiler(external_build_deps):
