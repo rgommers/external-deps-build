@@ -30,7 +30,7 @@ dependencies = [
   "rich",
   "typer",
   "requests",
-  "external_metadata_mappings @ https://github.com/jaimergp/external-metadata-mappings/archive/main.tar.gz"
+  "external_metadata_mappings @ git+https://github.com/jaimergp/external-metadata-mappings"
 ]
 
 [project.urls]
