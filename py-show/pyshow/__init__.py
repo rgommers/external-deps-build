@@ -136,13 +136,13 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
             try:
                 _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['build'])
                 _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['host'])
-            except KeyError:
+            except (KeyError, StopIteration):
                 raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!")
         
         for dep in external_run_deps:
             try:
                 _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep)))['specs']['run'])
-            except KeyError:
+            except (KeyError, StopIteration):
                 raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
         if _uses_c_cpp_compiler(external_build_deps):
