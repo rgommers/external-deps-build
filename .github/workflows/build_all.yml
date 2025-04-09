@@ -31,7 +31,7 @@ jobs:
       matrix:
         platform:
           - ["archlinux:latest", "Arch"]
-          - ["fedora:39", "Fedora"]
+          - ["fedora:40", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
         pkgdata:
           - [cryptography, cryptography]
@@ -122,7 +122,7 @@ jobs:
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
           - ["archlinux:latest", "Arch", true]
-          - ["fedora:39", "Fedora", true]
+          - ["fedora:40", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
