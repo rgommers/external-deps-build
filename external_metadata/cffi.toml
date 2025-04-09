@@ -1,7 +1,7 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
+  "dep:virtual/compiler/c",
 ]
 host-requires = [
-  "pkg:generic/libffi",
+  "dep:generic/libffi",
 ]
