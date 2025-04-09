@@ -56,8 +56,19 @@ def validate_purl(purl):
         warnings.warn(msg)
 
 
-def read_pyproject(package_name: str):
-    fname_sdist = sorted((HERE / "../../sdist/_amended/").glob(f"{package_name}-*.tar.gz"))[-1]
+def read_pyproject(package_name: str, sdist_dir: str | Path | None = None):
+    if sdist_dir is None:
+        # assume editable install
+        sdist_dir = HERE / "../../sdist/_amended/"
+    else:
+        sdist_dir = Path(sdist_dir)
+    fname_sdist = sorted(sdist_dir.glob(f"{package_name}-*.tar.gz"))
+    if not fname_sdist:
+        raise ValueError(f"Couldn't find sdist for {package_name} at {sdist_dir}")
+    if len(fname_sdist) > 1:
+        warnings.warn("More than one sdist found; choosing latest one")
+    fname_sdist = fname_sdist[-1]
+
     with tarfile.open(fname_sdist) as tar:
         fileobj_toml = None
         for info in tar.getmembers():
@@ -100,11 +111,11 @@ def print_toml_key(key, table):
 
 
 def parse_external(package_name: str, show: bool = False, apply_mapping: bool = False,
-                   distro_name: str = None) -> list[str]:
+                   distro_name: str = None, sdist_dir: str | Path | None = None) -> list[str]:
     """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
     external_run_deps = []
-    toml = read_pyproject(package_name)
+    toml = read_pyproject(package_name, sdist_dir=sdist_dir)
     if 'external' in toml:
         external = toml['external']
         for key in ('build-requires', 'host-requires', 'dependencies'):
@@ -188,12 +199,13 @@ def main(package_name: str,
         help="Show install command with system package manager for `--pypi` and/or "
              "`--external` dependencies")] = False,
     package_manager: Annotated[str, typer.Option(help="If given, use this package manager rather than auto-detect one")] = "",
+    sdist_dir: Annotated[str | None, typer.Option(help="Directory where amended sdists are located")] = None,
     ) -> None:
     """
     py-show: inspecting package dependencies
     """
     if external:
-        purls = parse_external(package_name, show=not system_install_cmd)
+        purls = parse_external(package_name, show=not system_install_cmd, sdist_dir=sdist_dir)
         if purls and validate:
             for purl in purls:
                 validate_purl(purl)
@@ -212,7 +224,7 @@ def main(package_name: str,
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
         package_manager = mapping.get_package_manager(package_manager)
-        external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name)
+        external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name, sdist_dir=sdist_dir)
         cmd = mapping.build_install_command(package_manager, external_deps)
         print(shlex.join(cmd))
 
