@@ -75,11 +75,11 @@ def read_pyproject(package_name: str):
 
 def get_distro():
     for name in [distro.id(), distro.like()]:
-        if name in package_manager.keys():
+        if name == 'darwin':
+            return 'homebrew'
+        elif name in package_manager.keys():
             return name
 
-    if name == 'darwin':
-        return 'homebrew'
 
     warnings.warn(f'No support for distro {distro.id()} yet!')
     # FIXME
