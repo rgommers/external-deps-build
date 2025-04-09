@@ -47,6 +47,7 @@ jobs:
 
       - name: Download and patch sdist
         run: |
+          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
@@ -59,6 +60,7 @@ jobs:
 
       - name: Install external dependencies
         run: |
+          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
@@ -66,8 +68,6 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          # `py-show` is not a package yet, so define an alias
-          shopt -s expand_aliases
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             pyshow_args="--package-manager=micromamba"
             else
@@ -80,16 +80,18 @@ jobs:
 
       - name: Build from sdist
         run: |
+          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/amended_sdist.tar.gz -v
+          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Import installed package
         run: |
+          set -ex
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
