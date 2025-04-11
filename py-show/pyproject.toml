@@ -30,7 +30,7 @@ dependencies = [
   "rich",
   "typer",
   "requests",
-  "external_metadata_mappings @ https://github.com/jaimergp/external-metadata-mappings/archive/main.tar.gz"
+  "external_metadata_mappings @ https://github.com/jaimergp/external-metadata-mappings/archive/versions.tar.gz"
 ]
 
 [project.urls]
@@ -45,6 +45,7 @@ platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [tool.pixi.pypi-dependencies]
 "pyshow" = {editable = true, path = "."}
+# "external_metadata_mappings" = {editable = true, path = "/Users/jrodriguez/devel/external-metadata-mappings"}
 
 [tool.pixi.tasks]
 prepare = "cd \"$PIXI_PROJECT_ROOT/..\" && python download_and_patch_sdist.py"

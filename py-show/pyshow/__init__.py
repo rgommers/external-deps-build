@@ -14,6 +14,7 @@ from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 HERE = Path(__file__).parent
 
+
 @cache
 def get_known_ecosystems() -> Mapping:
     return Ecosystems.from_url(
@@ -77,67 +78,72 @@ def read_pyproject(package_name: str, sdist_dir: str | Path | None = None):
         fileobj_toml = None
         for info in tar.getmembers():
             name = info.name
-            if '/' in name and name.split('/')[1] == 'pyproject.toml':
+            if "/" in name and name.split("/")[1] == "pyproject.toml":
                 fileobj_toml = tar.extractfile(info)
                 break
 
         if fileobj_toml is None:
             raise ValueError("Could not read pyproject.toml file from sdist")
-        
+
         tomldata = tomllib.load(fileobj_toml)
     return tomldata
 
 
 def get_distro():
     for name in [distro.id(), distro.like()]:
-        if name == 'darwin':
-            return 'homebrew'
-        elif name in package_manager.keys():
+        if name == "darwin":
+            return "homebrew"
+        elif name in distro_to_package_manager.keys():
             return name
 
-    warnings.warn(f'No support for distro {distro.id()} yet!')
+    warnings.warn(f"No support for distro {distro.id()} yet!")
     # FIXME
-    return 'fedora'
-    
+    return "fedora"
+
 
 def print_toml_key(key, table):
     if key in table:
-        print(f'[cyan]{key}[/]:')
+        print(f"[cyan]{key}[/]:")
         if isinstance(table[key], list):
             for item in table[key]:
-                print(f'[bright_black]  {item}[/]')
+                print(f"[bright_black]  {item}[/]")
         elif isinstance(table[key], dict):
             for key2 in table[key]:
-                print(f'  [bright_black]{key2}[/]:')
+                print(f"  [bright_black]{key2}[/]:")
                 for item in table[key][key2]:
-                    print(f'[bright_black]    {item}[/]')
+                    print(f"[bright_black]    {item}[/]")
 
 
-def parse_external(package_name: str, show: bool = False, apply_mapping: bool = False,
-                   distro_name: str = None, sdist_dir: str | Path | None = None) -> list[str]:
+def parse_external(
+    package_name: str,
+    show: bool = False,
+    apply_mapping_for: str | None = None,
+    distro_name: str = None,
+    sdist_dir: str | Path | None = None,
+) -> list[str]:
     """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
     external_run_deps = []
     toml = read_pyproject(package_name, sdist_dir=sdist_dir)
-    if 'external' in toml:
-        external = toml['external']
-        for key in ('build-requires', 'host-requires', 'dependencies'):
+    if "external" in toml:
+        external = toml["external"]
+        for key in ("build-requires", "host-requires", "dependencies"):
             if key in external:
-                if 'requires' in key:
+                if "requires" in key:
                     external_build_deps.extend(external[key])
                 else:
                     external_run_deps.extend(external[key])
                 if show:
                     print_toml_key(key, external)
 
-        for key in ('optional-build-requires', 'optional-host-requires', 'optional-dependencies'):
+        for key in ("optional-build-requires", "optional-host-requires", "optional-dependencies"):
             if key in external:
-                if 'requires' in key:
-                    external_build_deps.extend(external[key]['extra'])
+                if "requires" in key:
+                    external_build_deps.extend(external[key]["extra"])
                 if show:
                     print_toml_key(key, external)
 
-    if not apply_mapping:
+    if not apply_mapping_for:
         all_deps = external_build_deps.copy()
         all_deps.extend(external_run_deps)
         return list(dict.fromkeys(all_deps))
@@ -149,15 +155,37 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
         _registry = get_remote_registry()
         for dep in external_build_deps:
             try:
-                mapped_specs = next(iter(_mapping.iter_by_id(dep, resolve_alias_with_registry=_registry, only_mapped=True)))
-                _mapped_deps.extend(mapped_specs['specs']['build'])
-                _mapped_deps.extend(mapped_specs['specs']['host'])
+                mapped_specs = next(
+                    iter(
+                        _mapping.iter_specs_by_id(
+                            dep,
+                            apply_mapping_for,
+                            specs_type=("build", "host"),
+                            resolve_alias_with_registry=_registry,
+                            only_mapped=True,
+                        )
+                    )
+                )
+                _mapped_deps.extend(mapped_specs)
             except StopIteration as exc:
-                raise ValueError(f"Mapping entry for external build dependency `{dep}` missing!") from exc
+                raise ValueError(
+                    f"Mapping entry for external build dependency `{dep}` missing!"
+                ) from exc
 
         for dep in external_run_deps:
             try:
-                _mapped_deps.extend(next(iter(_mapping.iter_by_id(dep, resolve_alias_with_registry=_registry)))['specs']['run'])
+                mapped_specs = next(
+                    iter(
+                        _mapping.iter_specs_by_id(
+                            dep,
+                            apply_mapping_for,
+                            specs_type="run",
+                            resolve_alias_with_registry=_registry,
+                            only_mapped=True,
+                        )
+                    )
+                )
+                _mapped_deps.extend(mapped_specs)
             except StopIteration:
                 raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
@@ -171,7 +199,7 @@ def parse_external(package_name: str, show: bool = False, apply_mapping: bool = 
 
 
 def _uses_c_cpp_compiler(external_build_deps: list[str]) -> bool:
-    for compiler in ('dep:virtual/compiler/c', 'dep:virtual/compiler/cpp'):
+    for compiler in ("dep:virtual/compiler/c", "dep:virtual/compiler/cpp"):
         if compiler in external_build_deps:
             return True
     return False
@@ -184,29 +212,40 @@ def get_python_dev(distro_name) -> list[str]:
     build Python extension modules.
     """
     _mapping = get_remote_mapping(distro_name)
-    return next(iter(_mapping.iter_by_id('dep:generic/python')))['specs']['build']
+    return next(iter(_mapping.iter_by_id("dep:generic/python")))["specs"]["build"]
 
 
 # This should be a registration mechanism - it's here now for demo purposes.
-package_manager = {
-    'arch': 'pacman',
-    'fedora': 'dnf',
-    'ubuntu': 'apt-get',
-    'conda-forge': 'mamba',
-    'darwin': 'brew'
+distro_to_package_manager = {
+    "arch": "pacman",
+    "fedora": "dnf",
+    "ubuntu": "apt-get",
+    "conda-forge": "mamba",
+    "darwin": "brew",
 }
-package_manager_to_distro = {v: k for k, v in package_manager.items()}
+package_manager_to_distro = {v: k for k, v in distro_to_package_manager.items()}
 
 
-def main(package_name: str,
+def main(
+    package_name: str,
     external: Annotated[bool, typer.Option(help="Show external dependencies for package")] = False,
-    validate: Annotated[bool, typer.Option(help="Validate external dependencies against central registry")] = False,
-    system_install_cmd: Annotated[bool, typer.Option(
-        help="Show install command with system package manager for `--pypi` and/or "
-             "`--external` dependencies")] = False,
-    package_manager: Annotated[str, typer.Option(help="If given, use this package manager rather than auto-detect one")] = "",
-    sdist_dir: Annotated[str | None, typer.Option(help="Directory where amended sdists are located")] = None,
-    ) -> None:
+    validate: Annotated[
+        bool, typer.Option(help="Validate external dependencies against central registry")
+    ] = False,
+    system_install_cmd: Annotated[
+        bool,
+        typer.Option(
+            help="Show install command with system package manager for `--pypi` and/or "
+            "`--external` dependencies"
+        ),
+    ] = False,
+    package_manager: Annotated[
+        str, typer.Option(help="If given, use this package manager rather than auto-detect one")
+    ] = "",
+    sdist_dir: Annotated[
+        str | None, typer.Option(help="Directory where amended sdists are located")
+    ] = None,
+) -> None:
     """
     py-show: inspecting package dependencies
     """
@@ -226,11 +265,15 @@ def main(package_name: str,
         distro_name = get_distro()
         package_manager = ecosystems["ecosystems"][distro_name]["package_managers"][0]
 
-
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
         package_manager = mapping.get_package_manager(package_manager)
-        external_deps = parse_external(package_name, apply_mapping=True, distro_name=distro_name, sdist_dir=sdist_dir)
+        external_deps = parse_external(
+            package_name,
+            apply_mapping_for=package_manager["name"],
+            distro_name=distro_name,
+            sdist_dir=sdist_dir,
+        )
         cmd = mapping.build_install_command(package_manager, external_deps)
         print(shlex.join(cmd))
 
@@ -239,5 +282,5 @@ def entry_point():
     typer.run(main)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     entry_point()
