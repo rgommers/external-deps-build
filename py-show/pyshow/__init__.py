@@ -275,7 +275,8 @@ def main(
             sdist_dir=sdist_dir,
         )
         cmd = mapping.build_install_command(package_manager, external_deps)
-        print(shlex.join(cmd))
+        # print(shlex.join(cmd))
+        print(" ".join(cmd))
 
 
 def entry_point():
