@@ -19,7 +19,7 @@ HERE = Path(__file__).parent
 def get_known_ecosystems() -> Mapping:
     return Ecosystems.from_url(
         "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
-        "refs/heads/main/data/known-ecosystems.json"
+        "refs/heads/versions/data/known-ecosystems.json"
     )
 
 
@@ -27,7 +27,7 @@ def get_known_ecosystems() -> Mapping:
 def get_remote_mapping(ecosystem: str) -> Mapping:
     return Mapping.from_url(
         "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
-        f"refs/heads/main/data/{ecosystem}.mapping.json"
+        f"refs/heads/versions/data/{ecosystem}.mapping.json"
     )
 
 
@@ -35,7 +35,7 @@ def get_remote_mapping(ecosystem: str) -> Mapping:
 def get_remote_registry() -> Registry:
     return Registry.from_url(
         "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
-        "refs/heads/main/data/registry.json"
+        "refs/heads/versions/data/registry.json"
     )
 
 
