@@ -8,7 +8,7 @@ from typing import Annotated
 
 import distro
 import typer
-from rich import print
+from rich import print as rprint
 from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
@@ -103,15 +103,15 @@ def get_distro():
 
 def print_toml_key(key, table):
     if key in table:
-        print(f"[cyan]{key}[/]:")
+        rprint(f"[cyan]{key}[/]:")
         if isinstance(table[key], list):
             for item in table[key]:
-                print(f"[bright_black]  {item}[/]")
+                rprint(f"[bright_black]  {item}[/]")
         elif isinstance(table[key], dict):
             for key2 in table[key]:
-                print(f"  [bright_black]{key2}[/]:")
+                rprint(f"  [bright_black]{key2}[/]:")
                 for item in table[key][key2]:
-                    print(f"[bright_black]    {item}[/]")
+                    rprint(f"[bright_black]    {item}[/]")
 
 
 def parse_external(
