@@ -8,7 +8,7 @@ build-requires = [
 host-requires = [
   "dep:github/apache/arrow",
   "dep:generic/zlib",
-  "dep:generic/llvm",
+  "dep:generic/llvm@<20",
 ]
 
 # PyArrow has many optional dependencies (see `PYARROW_WITH_*` env vars in
