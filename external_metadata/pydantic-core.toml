@@ -1,4 +1,4 @@
 [external]
 build-requires = [
-  "virtual:compiler/rust",
+  "dep:virtual/compiler/rust",
 ]

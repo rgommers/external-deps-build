@@ -1,7 +1,7 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
-  "virtual:compiler/cpp",
-  "pkg:generic/make",
-  "pkg:generic/pkg-config",
+  "dep:virtual/compiler/c",
+  "dep:virtual/compiler/cpp",
+  "dep:generic/make",
+  "dep:generic/pkg-config",
 ]
