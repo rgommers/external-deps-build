@@ -84,7 +84,7 @@ jobs:
 
           py-show --external $name $pyshow_args
           py-show --external --system-install-cmd $name $pyshow_args
-          $(py-show --external --system-install-cmd $name $pyshow_args)
+          eval "$(py-show --external --system-install-cmd $name $pyshow_args)"
 
       - name: Build from sdist
         run: |
