@@ -77,7 +77,7 @@ jobs:
                 export AR="${GCC_AR:gcc-ar}"
               ;;
               pyarrow)
-                micromamba install clang
+                micromamba install clangdev
               ;;
             esac
           else
