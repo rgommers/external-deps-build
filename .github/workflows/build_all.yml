@@ -72,6 +72,9 @@ jobs:
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
+            if [[ ${{ matrix.pkgdata[0] }} == "matplotlib" ]]; then
+              export AR="${GCC_AR:gcc-ar}"
+            fi
           else
             source venv/bin/activate
           fi
