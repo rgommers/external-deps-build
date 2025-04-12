@@ -12,10 +12,10 @@ extra = [
   "dep:generic/lcms2",
   "dep:generic/freetype",
   "dep:generic/libimagequant",
-  "dep:generic/libraqm",
+  # "dep:generic/libraqm",  # optional
   "dep:generic/libtiff",
   "dep:generic/libxcb",
   "dep:generic/libwebp",
-  "dep:generic/openjpeg",  # add >=2.0 once we have version specifiers
+  "dep:generic/openjpeg@>=2.0",
   "dep:generic/tk",
 ]
