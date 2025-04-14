@@ -1,7 +1,7 @@
+import logging
 import shlex
 import tarfile
 import tomllib
-import warnings
 from functools import cache
 from pathlib import Path
 from typing import Annotated
@@ -9,10 +9,13 @@ from typing import Annotated
 import distro
 import typer
 from rich import print as rprint
+from rich.logging import RichHandler
 from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
 HERE = Path(__file__).parent
+logging.basicConfig(format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+log = logging.getLogger(__name__)
 
 
 @cache
@@ -42,7 +45,7 @@ def get_remote_registry() -> Registry:
 def validate_purl(purl):
     reg = get_remote_registry()
     if purl not in reg.iter_unique_purls():
-        raise warnings.warn(f"PURL {purl} is not recognized in the central registry.")
+        log.warning(f"PURL {purl} is not recognized in the central registry.")
     canonical = {item["id"] for item in reg.iter_canonical()}
     if purl not in canonical:
         for d in reg.iter_by_id(purl):
@@ -54,7 +57,7 @@ def validate_purl(purl):
         msg = f"PURL {purl} is not using a canonical reference."
         if references:
             msg += f" Try with one of: {references}."
-        warnings.warn(msg)
+        log.warning(msg)
 
 
 def read_pyproject(package_name: str, sdist_dir: str | Path | None = None):
@@ -68,7 +71,7 @@ def read_pyproject(package_name: str, sdist_dir: str | Path | None = None):
         tarballs = sorted(sdist_dir.glob(f"{name}-*.tar.gz"))
         if tarballs:
             if len(tarballs) > 1:
-                warnings.warn("More than one sdist found; choosing latest one")
+                log.warning("More than one sdist found; choosing latest one")
             fname_sdist = tarballs[-1]
             break
     if fname_sdist is None:
@@ -96,7 +99,7 @@ def get_distro():
         elif name in distro_to_package_manager.keys():
             return name
 
-    warnings.warn(f"No support for distro {distro.id()} yet!")
+    log.warning(f"No support for distro {distro.id()} yet!")
     # FIXME
     return "fedora"
 
@@ -132,7 +135,7 @@ def _get_mapped_spec(
     except (StopIteration, ValueError) as exc:
         msg = f"mapping entry for external build dependency `{dep}` missing!"
         if optional:
-            warnings.warn(f"optional {msg}")
+            log.warning(f"optional {msg}")
             return ()
         else:
             raise ValueError(msg) from exc
