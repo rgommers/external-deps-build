@@ -51,6 +51,23 @@ platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 prepare = "cd \"$PIXI_PROJECT_ROOT/..\" && python download_and_patch_sdist.py"
 py-show = "cd \"$PIXI_PROJECT_ROOT/..\" && py-show"
 
+[tool.pixi.feature.build.dependencies]
+micromamba = "*"
+
+[tool.pixi.feature.build.tasks.build-with-conda]
+args = [
+  {arg = "package"}
+]
+cmd = """
+  cd \"$PIXI_PROJECT_ROOT/..\" &&
+  python download_and_patch_sdist.py {{ package }} &&
+  micromamba create -p $PIXI_PROJECT_ROOT/.pixi/build-envs/{{ package }} python pip || true &&
+  $(py-show --external --system-install-cmd --package-manager micromamba --sdist-dir sdist/_amended {{ package }}) -p $PIXI_PROJECT_ROOT/.pixi/build-envs/{{ package }} &&
+  micromamba run -p $PIXI_PROJECT_ROOT/.pixi/build-envs/{{ package }} python -m pip install sdist/_amended/{{ package }}-*.tar.gz -v
+  """
+[tool.pixi.environments]
+build = ["build"]
+
 [tool.ruff]
 line-length = 99
 
