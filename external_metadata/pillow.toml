@@ -12,7 +12,7 @@ extra = [
   "dep:generic/lcms2",
   "dep:generic/freetype",
   "dep:generic/libimagequant",
-  # "dep:generic/libraqm",  # optional
+  "dep:generic/libraqm",
   "dep:generic/libtiff",
   "dep:generic/libxcb",
   "dep:generic/libwebp",

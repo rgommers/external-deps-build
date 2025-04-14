@@ -114,6 +114,30 @@ def print_toml_key(key, table):
                     rprint(f"[bright_black]    {item}[/]")
 
 
+def _get_mapped_spec(
+    dep, mapping, package_manager, registry, specs_type="run", optional: bool = False
+):
+    try:
+        return next(
+            iter(
+                mapping.iter_specs_by_id(
+                    dep,
+                    package_manager,
+                    specs_type=specs_type,
+                    resolve_alias_with_registry=registry,
+                    only_mapped=True,
+                )
+            )
+        )
+    except (StopIteration, ValueError) as exc:
+        msg = f"mapping entry for external build dependency `{dep}` missing!"
+        if optional:
+            warnings.warn(f"optional {msg}")
+            return ()
+        else:
+            raise ValueError(msg) from exc
+
+
 def parse_external(
     package_name: str,
     show: bool = False,
@@ -123,7 +147,9 @@ def parse_external(
 ) -> list[str]:
     """Adds optional build/host deps in 'extra' by default, because those are typically desired"""
     external_build_deps = []
+    optional_external_build_deps = []
     external_run_deps = []
+    optional_external_run_deps = []
     toml = read_pyproject(package_name, sdist_dir=sdist_dir)
     if "external" in toml:
         external = toml["external"]
@@ -139,7 +165,9 @@ def parse_external(
         for key in ("optional-build-requires", "optional-host-requires", "optional-dependencies"):
             if key in external:
                 if "requires" in key:
-                    external_build_deps.extend(external[key]["extra"])
+                    optional_external_build_deps.extend(external[key]["extra"])
+                else:
+                    optional_external_run_deps(external[key]["extra"])
                 if show:
                     print_toml_key(key, external)
 
@@ -153,41 +181,23 @@ def parse_external(
         _mapping = get_remote_mapping(distro_name)
         _mapped_deps = []
         _registry = get_remote_registry()
-        for dep in external_build_deps:
-            try:
-                mapped_specs = next(
-                    iter(
-                        _mapping.iter_specs_by_id(
-                            dep,
-                            apply_mapping_for,
-                            specs_type=("build", "host"),
-                            resolve_alias_with_registry=_registry,
-                            only_mapped=True,
-                        )
+        for depgroup, specs_type, optional in (
+            (external_build_deps, ("build", "host"), False),
+            (optional_external_build_deps, ("build", "host"), True),
+            (external_run_deps, "run", False),
+            (optional_external_run_deps, "run", True),
+        ):
+            for dep in depgroup:
+                _mapped_deps.extend(
+                    _get_mapped_spec(
+                        dep,
+                        mapping=_mapping,
+                        package_manager=apply_mapping_for,
+                        specs_type=specs_type,
+                        registry=_registry,
+                        optional=optional,
                     )
                 )
-                _mapped_deps.extend(mapped_specs)
-            except StopIteration as exc:
-                raise ValueError(
-                    f"Mapping entry for external build dependency `{dep}` missing!"
-                ) from exc
-
-        for dep in external_run_deps:
-            try:
-                mapped_specs = next(
-                    iter(
-                        _mapping.iter_specs_by_id(
-                            dep,
-                            apply_mapping_for,
-                            specs_type="run",
-                            resolve_alias_with_registry=_registry,
-                            only_mapped=True,
-                        )
-                    )
-                )
-                _mapped_deps.extend(mapped_specs)
-            except StopIteration:
-                raise ValueError(f"Mapping entry for external run dependency `{dep}` missing!")
 
         if _uses_c_cpp_compiler(external_build_deps):
             # TODO: handling of non-default Python installs isn't done here,
