@@ -61,6 +61,7 @@ def append_external_metadata(fname_sdist, package_name):
 
 def apply_patches(package_name, unpacked_dir):
     if package_name == "grpcio":
+        # This patch is only needed because grpcio doesn't contain a pyproject.toml at all
         setup_py = Path(unpacked_dir, "setup.py").read_text()
         metadata = Path(unpacked_dir, "_metadata.py").read_text()
         match = re.match(r'__version__ = """(\d\.)+"""', metadata)
