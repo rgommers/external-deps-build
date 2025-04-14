@@ -3,6 +3,7 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:virtual/compiler/cpp",
   "dep:generic/cmake",
+  "dep:generic/clang",
 ]
 
 host-requires = [
