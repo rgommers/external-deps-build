@@ -69,6 +69,10 @@ def apply_patches(package_name, unpacked_dir):
         setup_py = setup_py.replace("import _metadata", "# import _metadata")
         setup_py = setup_py.replace("_metadata.__version__", f"'{version}'")
         Path(unpacked_dir, "setup.py").write_text(setup_py)
+    elif package_name == "matplotlib":
+        meson_build = Path(unpacked_dir, "meson.build").read_text()
+        meson_build = meson_build.replace("'b_lto=true'", "'b_lto=false'")
+        Path(unpacked_dir, "meson.build").write_text(meson_build)
 
 
 def create_new_sdist(sdist_name, sdist_dir, amended_dir):
