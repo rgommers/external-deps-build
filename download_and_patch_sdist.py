@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import re
 import tarfile
 import urllib.request
 import warnings
@@ -51,10 +52,22 @@ def untar_sdist(fname_sdist, sdist_dir):
 
 
 def append_external_metadata(fname_sdist, package_name):
-    with open(fname_sdist, 'a') as f:
-        f.write('\n')
-        with open(f'external_metadata/{package_name}.toml') as f2:
-            f.write(f2.read())
+    pyproject_toml = Path(fname_sdist)
+    pyproject_toml_contents = pyproject_toml.read_text()
+    external_metadata = Path("external_metadata", f"{package_name}.toml").read_text()
+    if external_metadata not in pyproject_toml_contents:
+        pyproject_toml.write_text(pyproject_toml_contents + "\n" + external_metadata)
+
+
+def apply_patches(package_name, unpacked_dir):
+    if package_name == "grpcio":
+        setup_py = Path(unpacked_dir, "setup.py").read_text()
+        metadata = Path(unpacked_dir, "_metadata.py").read_text()
+        match = re.match(r'__version__ = """(\d\.)+"""', metadata)
+        version = match.group(0) if match else "1.71.0"
+        setup_py = setup_py.replace("import _metadata", "# import _metadata")
+        setup_py = setup_py.replace("_metadata.__version__", f"'{version}'")
+        Path(unpacked_dir, "setup.py").write_text(setup_py)
 
 
 def create_new_sdist(sdist_name, sdist_dir, amended_dir):
@@ -77,4 +90,5 @@ if __name__ == '__main__':
     fname_sdist = download_sdist(package_name, sdist_dir)
     fname_pyproject_toml = untar_sdist(fname_sdist, sdist_dir)
     append_external_metadata(fname_pyproject_toml, package_name)
+    apply_patches(package_name, fname_pyproject_toml.parent)
     create_new_sdist(fname_sdist, sdist_dir, amended_dir)
