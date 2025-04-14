@@ -172,7 +172,7 @@ def parse_external(
                 if "requires" in key:
                     optional_external_build_deps.extend(external[key]["extra"])
                 else:
-                    optional_external_run_deps(external[key]["extra"])
+                    optional_external_run_deps.extend(external[key]["extra"])
                 if show:
                     print_toml_key(key, external)
 
