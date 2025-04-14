@@ -14,7 +14,9 @@ from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
 HERE = Path(__file__).parent
-logging.basicConfig(format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(
+    level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+)
 log = logging.getLogger(__name__)
 
 
@@ -135,7 +137,7 @@ def _get_mapped_spec(
     except (StopIteration, ValueError) as exc:
         msg = f"mapping entry for external build dependency `{dep}` missing!"
         if optional:
-            log.warning(f"optional {msg}")
+            log.info(f"optional {msg}")
             return ()
         else:
             raise ValueError(msg) from exc
