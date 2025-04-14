@@ -9,13 +9,17 @@ from typing import Annotated
 import distro
 import typer
 from rich import print as rprint
+from rich.console import Console
 from rich.logging import RichHandler
 from external_metadata_mappings import Ecosystems, Registry, Mapping
 
 
 HERE = Path(__file__).parent
 logging.basicConfig(
-    level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(console=Console(stderr=True))],
 )
 log = logging.getLogger(__name__)
 
