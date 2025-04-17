@@ -1,10 +1,10 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
-  "virtual:compiler/rust",
-  "pkg:generic/pkg-config",
+  "dep:virtual/compiler/c",
+  "dep:virtual/compiler/rust",
+  "dep:generic/pkg-config",
 ]
 host-requires = [
-  "pkg:generic/openssl",
-  "pkg:generic/libffi",
+  "dep:generic/openssl",
+  "dep:generic/libffi",
 ]

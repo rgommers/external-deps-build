@@ -1,5 +1,5 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
-  "pkg:generic/make",
+  "dep:virtual/compiler/c",
+  "dep:generic/make",
 ]

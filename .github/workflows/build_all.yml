@@ -13,6 +13,15 @@ defaults:
 permissions:
   contents: read # to fetch code (actions/checkout)
 
+concurrency:
+  # Concurrency group that uses the workflow name and PR number if available
+  # or commit SHA as a fallback. If a new build is triggered under that
+  # concurrency group while a previous build is running it will be canceled.
+  # Repeated pushes to a PR will cancel all previous builds, while multiple
+  # merges to main will not cancel.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   smoketest:
     # Build only one package per distro, to avoid spinning up a ton of jobs if
@@ -22,7 +31,7 @@ jobs:
       matrix:
         platform:
           - ["archlinux:latest", "Arch"]
-          - ["fedora:39", "Fedora"]
+          - ["fedora:40", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
         pkgdata:
           - [cryptography, cryptography]
@@ -54,8 +63,10 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich
+          python -m pip install pypi_json distro typer rich ./py-show
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          ls -alh sdist/
+          ls -alh sdist/_amended
 
       - name: Install external dependencies
         run: |
@@ -66,17 +77,14 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          # `py-show` is not a package yet, so define an alias
-          shopt -s expand_aliases
+          pyshow_args="--sdist-dir=./sdist/_amended"
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            alias py-show="python py-show/pyshow/__init__.py --package-manager=micromamba"
-          else
-            alias py-show="python py-show/pyshow/__init__.py"
+            pyshow_args+=" --package-manager=micromamba"
           fi
 
-          py-show --external $name
-          py-show --external --system-install-cmd $name
-          $(py-show --external --system-install-cmd $name)
+          py-show --external $name $pyshow_args
+          py-show --external --system-install-cmd $name $pyshow_args
+          eval "$(py-show --external --system-install-cmd $name $pyshow_args)"
 
       - name: Build from sdist
         run: |
@@ -85,8 +93,14 @@ jobs:
           else
             source venv/bin/activate
           fi
+          # Build time patches
+          case ${{ matrix.pkgdata[0] }} in
+            matplotlib)
+              export AR="${GCC_AR:gcc-ar}"
+            ;;
+          esac
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/amended_sdist.tar.gz -v
+          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Import installed package
         run: |
@@ -100,7 +114,7 @@ jobs:
 
   with_external_metadata:
     needs: smoketest
-    if: "github.repository == 'rgommers/external-deps-build'"
+    if: github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
@@ -110,10 +124,10 @@ jobs:
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
           - ["archlinux:latest", "Arch", true]
-          - ["fedora:39", "Fedora", true]
+          - ["fedora:40", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
         pkgdata:
-          # [package-name, import-name]
+          # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
           - [pyyaml, yaml]  # poor detection of libyaml, falls back to pure Python on conda-forge
           - [lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
@@ -182,8 +196,10 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich
+          python -m pip install pypi_json distro typer rich ./py-show
           python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          ls -alh sdist/
+          ls -alh sdist/_amended
 
       - name: Install external dependencies
         if: ${{ matrix.platform[2] }}
@@ -195,17 +211,14 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          # `py-show` is not a package yet, so define an alias
-          shopt -s expand_aliases
+          pyshow_args="--sdist-dir=./sdist/_amended"
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            alias py-show="python py-show/pyshow/__init__.py --package-manager=micromamba"
-          else
-            alias py-show="python py-show/pyshow/__init__.py"
+            pyshow_args+=" --package-manager=micromamba"
           fi
 
-          py-show --external $name
-          py-show --external --system-install-cmd $name
-          $(py-show --external --system-install-cmd $name)
+          py-show --external $name $pyshow_args
+          py-show --external --system-install-cmd $name $pyshow_args
+          $(py-show --external --system-install-cmd $name $pyshow_args)
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
@@ -216,7 +229,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/amended_sdist.tar.gz -v
+          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}

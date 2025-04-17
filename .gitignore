@@ -1,0 +1,4 @@
+.pixi/
+**/.pixi/
+__pycache__/
+sdist/

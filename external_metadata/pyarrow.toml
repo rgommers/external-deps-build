@@ -1,12 +1,15 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
-  "virtual:compiler/cpp",
-  "pkg:generic/cmake",
+  "dep:virtual/compiler/c",
+  "dep:virtual/compiler/cpp",
+  "dep:generic/cmake",
+  "dep:generic/clang",
 ]
 
 host-requires = [
-  "pkg:github/apache/arrow",
+  "dep:github/apache/arrow",
+  "dep:generic/zlib",
+  "dep:generic/llvm@<20",
 ]
 
 # PyArrow has many optional dependencies (see `PYARROW_WITH_*` env vars in
@@ -15,6 +18,6 @@ host-requires = [
 # dependencies leaner.
 [external.optional-build-requires]
 extra = [
-  "pkg:generic/make",
-  "pkg:generic/ninja",
+  "dep:generic/make",
+  "dep:generic/ninja",
 ]

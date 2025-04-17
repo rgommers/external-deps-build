@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import re
 import tarfile
 import urllib.request
 import warnings
@@ -51,16 +52,35 @@ def untar_sdist(fname_sdist, sdist_dir):
 
 
 def append_external_metadata(fname_sdist, package_name):
-    with open(fname_sdist, 'a') as f:
-        f.write('\n')
-        with open(f'external_metadata/{package_name}.toml') as f2:
-            f.write(f2.read())
+    pyproject_toml = Path(fname_sdist)
+    pyproject_toml_contents = pyproject_toml.read_text()
+    external_metadata = Path("external_metadata", f"{package_name}.toml").read_text()
+    if external_metadata not in pyproject_toml_contents:
+        pyproject_toml.write_text(pyproject_toml_contents + "\n" + external_metadata)
 
 
-def create_new_sdist(sdist_name, sdist_dir):
+def apply_patches(package_name, unpacked_dir):
+    if package_name == "grpcio":
+        # This patch is only needed because grpcio doesn't contain a pyproject.toml at all
+        setup_py = Path(unpacked_dir, "setup.py").read_text()
+        metadata = Path(unpacked_dir, "_metadata.py").read_text()
+        match = re.match(r'__version__ = """(\d\.)+"""', metadata)
+        version = match.group(0) if match else "1.71.0"
+        setup_py = setup_py.replace("import _metadata", "# import _metadata")
+        setup_py = setup_py.replace("_metadata.__version__", f"'{version}'")
+        Path(unpacked_dir, "setup.py").write_text(setup_py)
+    elif package_name == "matplotlib":
+        # avoids missing symbol errors due to lto=on with some compilers
+        # https://github.com/matplotlib/matplotlib/issues/28357
+        meson_build = Path(unpacked_dir, "meson.build").read_text()
+        meson_build = meson_build.replace("'b_lto=true'", "'b_lto=false'")
+        Path(unpacked_dir, "meson.build").write_text(meson_build)
+
+
+def create_new_sdist(sdist_name, sdist_dir, amended_dir):
     dirname = sdist_name.split('.tar.gz')[0]
-    with tarfile.open(sdist_dir / 'amended_sdist.tar.gz', "w:gz") as tar:
-            tar.add(sdist_dir / dirname, arcname=dirname)
+    with tarfile.open(amended_dir / sdist_name.lower().replace("_", "-"), "w:gz") as tar:
+        tar.add(sdist_dir / dirname, arcname=dirname)
 
 
 if __name__ == '__main__':
@@ -70,10 +90,12 @@ if __name__ == '__main__':
 
     package_name = args.package_name
 
-    sdist_dir = Path('./sdist')
-    sdist_dir.mkdir(exist_ok=True)
+    amended_dir = Path('./sdist/_amended')
+    amended_dir.mkdir(exist_ok=True, parents=True)
+    sdist_dir = amended_dir.parent
 
     fname_sdist = download_sdist(package_name, sdist_dir)
     fname_pyproject_toml = untar_sdist(fname_sdist, sdist_dir)
     append_external_metadata(fname_pyproject_toml, package_name)
-    create_new_sdist(fname_sdist, sdist_dir)
+    apply_patches(package_name, fname_pyproject_toml.parent)
+    create_new_sdist(fname_sdist, sdist_dir, amended_dir)

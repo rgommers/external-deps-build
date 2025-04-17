@@ -1,5 +1,5 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
-  "virtual:compiler/cpp",
+  "dep:virtual/compiler/c",
+  "dep:virtual/compiler/cpp",
 ]

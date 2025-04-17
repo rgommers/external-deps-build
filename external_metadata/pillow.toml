@@ -1,21 +1,21 @@
 [external]
 build-requires = [
-  "virtual:compiler/c",
+  "dep:virtual/compiler/c",
 ]
 host-requires = [
-  "pkg:generic/libjpeg",
-  "pkg:generic/zlib",
+  "dep:generic/libjpeg",
+  "dep:generic/zlib",
 ]
 
 [external.optional-host-requires]
 extra = [
-  "pkg:generic/lcms2",
-  "pkg:generic/freetype",
-  "pkg:generic/libimagequant",
-  "pkg:generic/libraqm",
-  "pkg:generic/libtiff",
-  "pkg:generic/libxcb",
-  "pkg:generic/libwebp",
-  "pkg:generic/openjpeg",  # add >=2.0 once we have version specifiers
-  "pkg:generic/tk",
+  "dep:generic/lcms2",
+  "dep:generic/freetype",
+  "dep:generic/libimagequant",
+  "dep:generic/libraqm",
+  "dep:generic/libtiff",
+  "dep:generic/libxcb",
+  "dep:generic/libwebp",
+  "dep:generic/openjpeg@>=2.0",
+  "dep:generic/tk",
 ]
