@@ -33,11 +33,15 @@ def get_known_ecosystems() -> Mapping:
 
 
 @cache
-def get_remote_mapping(ecosystem: str) -> Mapping:
-    return Mapping.from_url(
-        "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
-        f"refs/heads/main/data/{ecosystem}.mapping.json"
-    )
+def get_remote_mapping(ecosystem_or_url: str) -> Mapping:
+    if ecosystem_or_url.startswith(("http:", "https:")):
+        url = ecosystem_or_url
+    else:
+        url = (
+            "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/"
+            f"refs/heads/main/data/{ecosystem_or_url}.mapping.json"
+        )
+    return Mapping.from_url(url)
 
 
 @cache
@@ -275,14 +279,20 @@ def main(
                 validate_purl(purl)
 
     ecosystems = get_known_ecosystems()
+    distro_name = None
     if package_manager:
         for name, details in ecosystems["ecosystems"].items():
-            if package_manager in details["package_managers"]:
-                distro_name = name
+            mapping = get_remote_mapping(details["mapping"])
+            for package_manager_details in mapping["package_managers"]:
+                if package_manager == package_manager_details["name"]:
+                    distro_name = name
+                    break
+            if distro_name is not None:
                 break
-    else:
+    if distro_name is None:
         distro_name = get_distro()
-        package_manager = ecosystems["ecosystems"][distro_name]["package_managers"][0]
+        mapping = get_remote_mapping(ecosystems["ecosystems"][distro_name]["mapping"])
+        package_manager = mapping["package_managers"][0]["name"]
 
     if system_install_cmd:
         mapping = get_remote_mapping(distro_name)
