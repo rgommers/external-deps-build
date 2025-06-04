@@ -1,2 +1,2 @@
 pypi_json
-https://github.com/jaimergp/pyproject-external/archive/main.tar.gz
+https://github.com/jaimergp/pyproject-external/archive/shlex.tar.gz
