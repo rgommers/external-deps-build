@@ -227,7 +227,7 @@ jobs:
           python -m pyproject_external --output=mapped $cli_args
           echo "Install command:"
           command_to_run="$(python -m pyproject_external --output=command $cli_args)"
-          echo $command_to_run
+          echo "$command_to_run"
           eval "$command_to_run"
 
       - name: Build from sdist
