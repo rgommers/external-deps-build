@@ -41,17 +41,17 @@ jobs:
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
-      - name: Install system Python
+      - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python git sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv python pip git  # will install 3.12
           fi
 
       - name: Download and patch sdist
@@ -180,14 +180,14 @@ jobs:
       - name: Install system Python
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python git sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv python pip git  # will install 3.12
           else
             echo 'Unsupported distro!'
           fi
