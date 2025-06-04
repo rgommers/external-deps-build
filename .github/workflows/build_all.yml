@@ -186,7 +186,7 @@ jobs:
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
-            cp .mambarc ~/.mambarc
+            cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv python pip git  # will install 3.12
           else
             echo 'Unsupported distro!'
