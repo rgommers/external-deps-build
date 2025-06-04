@@ -98,12 +98,6 @@ jobs:
           else
             source venv/bin/activate
           fi
-          # Build time patches
-          case ${{ matrix.pkgdata[0] }} in
-            matplotlib)
-              export AR="${GCC_AR:gcc-ar}"
-            ;;
-          esac
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
@@ -236,6 +230,12 @@ jobs:
           else
             source venv/bin/activate
           fi
+          # Build time patches
+          case ${{ matrix.pkgdata[0] }} in
+            matplotlib)
+              export AR="${GCC_AR:gcc-ar}"
+            ;;
+          esac
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
