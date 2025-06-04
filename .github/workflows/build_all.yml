@@ -50,7 +50,7 @@ jobs:
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
-            cp .mambarc ~/.mambarc
+            cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv python pip  # will install 3.12
           fi
 
@@ -63,8 +63,8 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich ./py-show
-          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          python -m pip install -r requirements.txt
+          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
           ls -alh sdist/
           ls -alh sdist/_amended
 
@@ -77,14 +77,20 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          pyshow_args="--sdist-dir=./sdist/_amended"
+          cli_args=""
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            pyshow_args+=" --package-manager=micromamba"
+            cli_args+=" --package-manager=micromamba"
           fi
+          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
 
-          py-show --external $name $pyshow_args
-          py-show --external --system-install-cmd $name $pyshow_args
-          eval "$(py-show --external --system-install-cmd $name $pyshow_args)"
+          echo "Raw external metadata:"
+          python -m external_metadata --output=raw $cli_args
+          echo "Mapped external metadata:"
+          python -m external_metadata --output=mapped $cli_args
+          echo "Install command:"
+          command_to_run="$(python -m external_metadata --output=command $cli_args)"
+          echo $command_to_run
+          eval "$command_to_run"
 
       - name: Build from sdist
         run: |
@@ -187,7 +193,6 @@ jobs:
           fi
 
       - name: Download and patch sdist
-        if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -196,13 +201,12 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich ./py-show
-          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          python -m pip install -r requirements.txt
+          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
           ls -alh sdist/
           ls -alh sdist/_amended
 
       - name: Install external dependencies
-        if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -211,14 +215,20 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          pyshow_args="--sdist-dir=./sdist/_amended"
+          cli_args=""
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            pyshow_args+=" --package-manager=micromamba"
+            cli_args+=" --package-manager=micromamba"
           fi
+          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
 
-          py-show --external $name $pyshow_args
-          py-show --external --system-install-cmd $name $pyshow_args
-          $(py-show --external --system-install-cmd $name $pyshow_args)
+          echo "Raw external metadata:"
+          python -m external_metadata --output=raw $cli_args
+          echo "Mapped external metadata:"
+          python -m external_metadata --output=mapped $cli_args
+          echo "Install command:"
+          command_to_run="$(python -m external_metadata --output=command $cli_args)"
+          echo $command_to_run
+          eval "$command_to_run"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
