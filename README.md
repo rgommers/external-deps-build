@@ -4,6 +4,7 @@ This is a proof of concept of using `[external]` metadata - i.e., metadata for
 Python packages of build and runtime dependencies on non-Python packages, see
 [PEP 725](https://peps.python.org/pep-0725/) - plus a "name mapping mechanism"
 to build wheels from source in clean Docker containers with a plain:
+
 ```
 pip install <package-name> --no-binary <package-name>
 ```
@@ -13,7 +14,8 @@ which uses [PURL (Package URLs)](https://github.com/package-url/purl-spec)-like
 identifiers (`dep:`) plus "virtual dependencies" for more abstract requirements like "a
 C++ compiler", into system package manager specific package names.
 
-The CLI interface to the name mapping mechanism is provided by the [`pyproject-external`][1]
+The CLI interface to the name mapping mechanism (available in 
+[`external-metadata-mappings`][2]) is provided by the [`pyproject-external`][1]
 library (`python -m pyproject_external`). It can also show install commands specific
 to the system package manager, which is potentially useful for end users.
 
@@ -130,3 +132,4 @@ Per-package success/failure:
 
 
 [1]: https://github.com/jaimergp/pyproject-external
+[2]: https://github.com/jaimergp/external-metadata-mappings
