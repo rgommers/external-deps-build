@@ -41,17 +41,17 @@ jobs:
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
-      - name: Install system Python
+      - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python git sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
-            cp .mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            cp .github/.mambarc ~/.mambarc
+            micromamba create -n cfenv python pip git  # will install 3.12
           fi
 
       - name: Download and patch sdist
@@ -63,8 +63,8 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich ./py-show
-          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          python -m pip install -r requirements.txt
+          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
           ls -alh sdist/
           ls -alh sdist/_amended
 
@@ -77,14 +77,19 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          pyshow_args="--sdist-dir=./sdist/_amended"
+          cli_args=""
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            pyshow_args+=" --package-manager=micromamba"
+            cli_args+=" --package-manager=micromamba"
           fi
+          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
 
-          py-show --external $name $pyshow_args
-          py-show --external --system-install-cmd $name $pyshow_args
-          eval "$(py-show --external --system-install-cmd $name $pyshow_args)"
+          echo "Raw external metadata:"
+          python -m pyproject_external --output=raw $cli_args
+          echo "Mapped external metadata:"
+          python -m pyproject_external --output=mapped $cli_args
+          echo "Install command:"
+          set +x
+          eval "$(python -m pyproject_external --output=command $cli_args)"
 
       - name: Build from sdist
         run: |
@@ -93,12 +98,6 @@ jobs:
           else
             source venv/bin/activate
           fi
-          # Build time patches
-          case ${{ matrix.pkgdata[0] }} in
-            matplotlib)
-              export AR="${GCC_AR:gcc-ar}"
-            ;;
-          esac
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
@@ -174,20 +173,19 @@ jobs:
       - name: Install system Python
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python git sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
-            cp .mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            cp .github/.mambarc ~/.mambarc
+            micromamba create -n cfenv python pip git  # will install 3.12
           else
             echo 'Unsupported distro!'
           fi
 
       - name: Download and patch sdist
-        if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -196,13 +194,12 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install pypi_json distro typer rich ./py-show
-          python download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
+          python -m pip install -r requirements.txt
+          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
           ls -alh sdist/
           ls -alh sdist/_amended
 
       - name: Install external dependencies
-        if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -211,14 +208,19 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          pyshow_args="--sdist-dir=./sdist/_amended"
+          cli_args=""
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            pyshow_args+=" --package-manager=micromamba"
+            cli_args+=" --package-manager=micromamba"
           fi
+          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
 
-          py-show --external $name $pyshow_args
-          py-show --external --system-install-cmd $name $pyshow_args
-          $(py-show --external --system-install-cmd $name $pyshow_args)
+          echo "Raw external metadata:"
+          python -m pyproject_external --output=raw $cli_args
+          echo "Mapped external metadata:"
+          python -m pyproject_external --output=mapped $cli_args
+          echo "Install command:"
+          set +x
+          eval "$(python -m pyproject_external --output=command $cli_args)"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
@@ -228,6 +230,12 @@ jobs:
           else
             source venv/bin/activate
           fi
+          # Build time patches
+          case ${{ matrix.pkgdata[0] }} in
+            matplotlib)
+              export AR="${GCC_AR:gcc-ar}"
+            ;;
+          esac
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
