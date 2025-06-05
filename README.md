@@ -85,12 +85,12 @@ Average CI job duration per package for the heaviest builds:
 | pydantic-core | 2m 41s     |
 | matplotlib    | 2m 8s      |
 | lxml          | 2m 5s      |
-| cryptography  | 1m 35s     |
+| cryptography  | 1m 33s     |
 
 
 Per-package success/failure:
 
-| package            | Fedora             | conda-forge        | Arch               |
+| package            | Arch               | conda-forge        | Fedora             |
 |:-------------------|:-------------------|:-------------------|:-------------------|
 | charset-normalizer | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | cryptography       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -105,7 +105,7 @@ Per-package success/failure:
 | sqlalchemy         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | aiohttp            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | grpcio             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pyarrow            | :x:                | :x:                | :heavy_check_mark: |
+| pyarrow            | :heavy_check_mark: | :x:                | :x:                |
 | wrapt              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | frozenlist         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | coverage           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -113,7 +113,7 @@ Per-package success/failure:
 | greenlet           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | yarl               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | multidict          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| scipy              | :x:                | :heavy_check_mark: | :heavy_check_mark: |
+| scipy              | :heavy_check_mark: | :heavy_check_mark: | :x:                |
 | httptools          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | pynacl             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | psycopg2-binary    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |

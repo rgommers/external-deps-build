@@ -37,8 +37,7 @@ def load_data() -> pd.DataFrame:
             package_name, distro_name, has_external_metadata = name_fields
             has_external_metadata = has_external_metadata == "false"
         elif len(name_fields) == 2:
-            package_name, distro_name = name_fields
-            has_external_metadata = False
+            continue  # these are the smoke tests
         success = job['conclusion'] == 'success'
         start_time = datetime.strptime(job['started_at'][:-1], "%Y-%m-%dT%H:%M:%S")
         end_time = datetime.strptime(job['completed_at'][:-1], "%Y-%m-%dT%H:%M:%S")
@@ -73,10 +72,13 @@ def print_table_successes(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) 
 
 
 def print_all(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) -> None:
+    print("Overall number of successful builds per distro:\n")
     print_table_success_stats(df_distros)
     print('\n')
+    print("Average CI job duration per package for the heaviest builds:\n")
     print_table_durations(df_distros)
     print('\n')
+    print("Per-package success/failure:\n")
     print_table_successes(df_distros, df_downloads)
 
 
