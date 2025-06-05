@@ -1,3 +1,12 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "pandas",
+#   "tabulate",
+# ]
+# ///
+# `gh` (Github's official CLI) is also a dependency
+
 import json
 import subprocess
 from datetime import datetime
@@ -23,9 +32,13 @@ def load_data() -> pd.DataFrame:
 
     rows = []
     for job in jobs:
-        package_name = job['name'].split(', ')[0]
-        distro_name = job['name'].split(', ')[1]
-        has_external_metadata = job['name'].split(', ')[2] == 'false'
+        name_fields = job['name'].split(', ')
+        if len(name_fields) == 3:
+            package_name, distro_name, has_external_metadata = name_fields
+            has_external_metadata = has_external_metadata == "false"
+        elif len(name_fields) == 2:
+            package_name, distro_name = name_fields
+            has_external_metadata = False
         success = job['conclusion'] == 'success'
         start_time = datetime.strptime(job['started_at'][:-1], "%Y-%m-%dT%H:%M:%S")
         end_time = datetime.strptime(job['completed_at'][:-1], "%Y-%m-%dT%H:%M:%S")
@@ -78,7 +91,7 @@ if __name__ == '__main__':
     df = load_data()
     df_baseline = df[df['baseline']].drop(columns='baseline')
     df_distros = df[~df['baseline']].drop(columns='baseline')
-    df_downloads = pd.read_csv('pypi_top150_nonpure.txt', names=['package'])
+    df_downloads = pd.read_csv('top_packages/pypi_top150_nonpure.txt', names=['package'])
     df_downloads['download_rank'] = df_downloads.index
 
     print_all(df_distros, df_downloads)
