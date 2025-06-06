@@ -31,7 +31,7 @@ def last_run_id() -> int:
         "--json=databaseId",
         "--jq=.[].databaseId",
     ]
-    return int(subprocess.run(cmd, check=True, text=True).stdout)
+    return int(subprocess.run(cmd, check=True, text=True, capture_output=True).stdout)
 
 
 def download_latest_gha_run_data(run_id: int, token: str) -> list[dict]:
@@ -138,6 +138,8 @@ def update_readme(df_distros, df_downloads) -> None:
 
 
 if __name__ == '__main__':
+    print(last_run_id())
+    import sys; sys.exit()
     df = load_data()
     df_baseline = df[df['baseline']].drop(columns='baseline')
     df_distros = df[~df['baseline']].drop(columns='baseline')
