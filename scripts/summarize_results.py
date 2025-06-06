@@ -79,6 +79,8 @@ def load_data() -> pd.DataFrame:
         duration = end_time - start_time
         rows.append([package_name, distro_name, has_external_metadata, success, duration])
 
+    # sort by distro, package so columns are created in deterministic order
+    rows.sort(key=lambda row: (row[1].lower(), row[0]))
     df = pd.DataFrame(rows, columns=['package', 'distro', 'baseline', 'success', 'duration'])
     return df
 
