@@ -38,7 +38,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "Update README"
+          git commit -a -m "Update README [ci skip]"
       - name: Push changes
         uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # v0.8.0
         if: github.event_name != 'pull_request'
