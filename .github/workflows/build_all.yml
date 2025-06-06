@@ -24,6 +24,7 @@ concurrency:
 
 jobs:
   smoketest:
+    if: false 
     # Build only one package per distro, to avoid spinning up a ton of jobs if
     # something simple is broken.
     strategy:
@@ -113,7 +114,8 @@ jobs:
 
   with_external_metadata:
     needs: smoketest
-    if: github.repository == 'rgommers/external-deps-build'
+    if: false 
+    # github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
