@@ -63,15 +63,18 @@ The [scripts](scripts/), CI setup and results in the repo basically do the follo
 
 Overall number of successful builds per distro:
 
+<!-- DISTRO_TABLE -->
 | distro      | success   |
 |:------------|:----------|
 | Arch        | 36/37     |
 | Fedora      | 34/37     |
 | conda-forge | 36/37     |
+<!-- /DISTRO_TABLE -->
 
 
 Average CI job duration per package for the heaviest builds:
 
+<!-- DURATION_TABLE -->
 | package       | duration   |
 |:--------------|:-----------|
 | scipy         | 13m 27s    |
@@ -86,10 +89,12 @@ Average CI job duration per package for the heaviest builds:
 | matplotlib    | 2m 8s      |
 | lxml          | 2m 5s      |
 | cryptography  | 1m 33s     |
+<!-- /DURATION_TABLE -->
 
 
 Per-package success/failure:
 
+<!-- SUCCESS_TABLE -->
 | package            | Arch               | conda-forge        | Fedora             |
 |:-------------------|:-------------------|:-------------------|:-------------------|
 | charset-normalizer | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -129,6 +134,7 @@ Per-package success/failure:
 | grpcio-tools       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | pycryptodomex      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | google-crc32c      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+<!-- /SUCCESS_TABLE -->
 
 
 [1]: https://github.com/jaimergp/pyproject-external
