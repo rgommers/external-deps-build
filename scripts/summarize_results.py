@@ -138,8 +138,6 @@ def update_readme(df_distros, df_downloads) -> None:
 
 
 if __name__ == '__main__':
-    print(last_run_id())
-    import sys; sys.exit()
     df = load_data()
     df_baseline = df[df['baseline']].drop(columns='baseline')
     df_distros = df[~df['baseline']].drop(columns='baseline')
