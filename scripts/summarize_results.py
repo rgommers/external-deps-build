@@ -53,8 +53,12 @@ def download_latest_gha_run_data(run_id: int, token: str) -> list[dict]:
 def load_data() -> pd.DataFrame:
     if token := os.environ.get("GH_TOKEN"):
         jobs = download_latest_gha_run_data(last_run_id(), token)
-        (REPO_ROOT / "results" / "jobs_first100.json").write_text(json.dumps({"jobs": jobs[:100]}))
-        (REPO_ROOT / "results" / "jobs_second48.json").write_text(json.dumps({"jobs": jobs[100:]}))
+        (REPO_ROOT / "results" / "jobs_first100.json").write_text(
+            json.dumps({"total_count": len(jobs), "jobs": jobs[:100]}, indent=2)
+        )
+        (REPO_ROOT / "results" / "jobs_second48.json").write_text(
+            json.dumps({"total_count": len(jobs), "jobs": jobs[100:]}, indent=2)
+        )
     else:
         data1 = json.loads((REPO_ROOT / "results" / "jobs_first100.json").read_text())
         data2 = json.loads((REPO_ROOT / "results" / "jobs_second48.json").read_text())
