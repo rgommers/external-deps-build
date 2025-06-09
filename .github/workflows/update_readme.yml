@@ -11,7 +11,8 @@ defaults:
     shell: bash
 
 permissions:
-    contents: write  # 'write' access to repository contents
+  contents: write  # 'write' access to repository contents
+  pull-requests: write
 
 concurrency:
   # Concurrency group that uses the workflow name and PR number if available
@@ -34,14 +35,17 @@ jobs:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Post diff
         run: git diff
-      - name: Commit files
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git commit -a -m "Update README [ci skip]"
-      - name: Push changes
-        uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # v0.8.0
+      - name: Create PR
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         if: github.event_name != 'pull_request'
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          commit-message: Regenerated README and results files [ci skip]
+          delete-branch: true
+          title: '[Automated] Update build results in README'
+          reviewers: jaimergp,rgommers
+          add-paths: |
+            README.md
+            results/*
