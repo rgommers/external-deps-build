@@ -59,7 +59,7 @@ The [scripts](scripts/), CI setup and results in the repo basically do the follo
 
 ## Results
 
-*These are the main results as of 4 Jun 2025.*
+*These are the main results as of <!-- DATE -->04 Jun 2025<!-- /DATE -->.*
 
 Overall number of successful builds per distro:
 
@@ -77,18 +77,18 @@ Average CI job duration per package for the heaviest builds:
 <!-- DURATION_TABLE -->
 | package       | duration   |
 |:--------------|:-----------|
-| scipy         | 13m 27s    |
-| grpcio        | 12m 51s    |
-| pyarrow       | 7m 3s      |
-| grpcio-tools  | 5m 46s     |
-| pandas        | 4m 59s     |
-| scikit-learn  | 4m 50s     |
-| numpy         | 4m 14s     |
+| scipy         | 13m 41s    |
+| grpcio        | 12m 54s    |
+| pyarrow       | 6m 59s     |
+| grpcio-tools  | 5m 51s     |
+| pandas        | 5m 2s      |
+| scikit-learn  | 4m 41s     |
+| numpy         | 4m 12s     |
 | pynacl        | 3m 4s      |
 | pydantic-core | 2m 41s     |
-| matplotlib    | 2m 8s      |
-| lxml          | 2m 5s      |
-| cryptography  | 1m 33s     |
+| lxml          | 2m 4s      |
+| matplotlib    | 1m 54s     |
+| cryptography  | 1m 30s     |
 <!-- /DURATION_TABLE -->
 
 

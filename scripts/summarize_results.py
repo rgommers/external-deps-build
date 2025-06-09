@@ -77,11 +77,11 @@ def load_data() -> pd.DataFrame:
         start_time = datetime.strptime(job['started_at'][:-1], "%Y-%m-%dT%H:%M:%S")
         end_time = datetime.strptime(job['completed_at'][:-1], "%Y-%m-%dT%H:%M:%S")
         duration = end_time - start_time
-        rows.append([package_name, distro_name, has_external_metadata, success, duration])
+        rows.append([package_name, distro_name, has_external_metadata, success, duration, end_time])
 
     # sort by distro, package so columns are created in deterministic order
     rows.sort(key=lambda row: (row[1].lower(), row[0]))
-    df = pd.DataFrame(rows, columns=['package', 'distro', 'baseline', 'success', 'duration'])
+    df = pd.DataFrame(rows, columns=['package', 'distro', 'baseline', 'success', 'duration', 'end_time'])
     return df
 
 
@@ -109,6 +109,7 @@ def table_successes(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) -> str
 
 
 def print_all(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) -> None:
+    print("Data as of", df_distros.end_time.max().strftime("%d %b %Y"))
     print("Overall number of successful builds per distro:\n")
     print(table_success_stats(df_distros))
     print('\n')
@@ -122,6 +123,13 @@ def print_all(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) -> None:
 def update_readme(df_distros, df_downloads) -> None:
     readme = Path(__file__).parent.parent / "README.md"
     readme_text = readme.read_text()
+    lastmod_date = df_distros.end_time.max().strftime("%d %b %Y")
+    readme_text = re.sub(
+        "<!-- DATE -->(.*)<!-- /DATE -->", 
+        f"<!-- DATE -->{lastmod_date}<!-- /DATE -->", 
+        readme_text, 
+        flags=re.MULTILINE | re.DOTALL,
+    )
     readme_text = re.sub(
         "<!-- DISTRO_TABLE -->(.*)<!-- /DISTRO_TABLE -->", 
         f"<!-- DISTRO_TABLE -->\n{table_success_stats(df_distros)}\n<!-- /DISTRO_TABLE -->", 
