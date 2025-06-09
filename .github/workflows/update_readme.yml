@@ -5,6 +5,14 @@ on:
     - cron: "15 4 * * 1"  # Early monday
   workflow_dispatch:
   pull_request:
+    paths:
+      - .github/workflows/update_readme.yml
+      - results/*
+      - scripts/find_nonpure_packages.py
+      - scripts/summarize_results.py
+      - top_packages/*
+      - README.md
+      - requirements.txt
 
 defaults:
   run:
