@@ -1,0 +1,59 @@
+name: Update README
+
+on:
+  schedule:
+    - cron: "15 4 * * 1"  # Early monday
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/update_readme.yml
+      - results/*
+      - scripts/find_nonpure_packages.py
+      - scripts/summarize_results.py
+      - top_packages/*
+      - README.md
+      - requirements.txt
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: write  # 'write' access to repository contents
+  pull-requests: write
+
+concurrency:
+  # Concurrency group that uses the workflow name and PR number if available
+  # or commit SHA as a fallback. If a new build is triggered under that
+  # concurrency group while a previous build is running it will be canceled.
+  # Repeated pushes to a PR will cancel all previous builds, while multiple
+  # merges to main will not cancel.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb #v6.1.0
+      - name: Update README
+        run: uv run scripts/summarize_results.py
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Post diff
+        run: git diff
+      - name: Create PR
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        if: github.event_name != 'pull_request'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          commit-message: Regenerated README and results files [ci skip]
+          delete-branch: true
+          title: '[Automated] Update build results in README'
+          reviewers: jaimergp,rgommers
+          add-paths: |
+            README.md
+            results/*
