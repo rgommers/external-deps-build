@@ -8,7 +8,7 @@ on:
       - .github/workflows/build_all.yml
       - .github/.mambarc
       - external_metadata/
-      - scripts/download_and_patch_sdist.yml
+      - scripts/download_and_patch_sdist.py
       - requirements.txt
   workflow_dispatch:
 
@@ -58,6 +58,8 @@ jobs:
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv python pip git  # will install 3.12
+            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
+            echo "${HOME}/.local/bin" >> $GITHUB_PATH
           fi
 
       - name: Download and patch sdist
@@ -180,6 +182,8 @@ jobs:
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv python pip git  # will install 3.12
+            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
+            echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else
             echo 'Unsupported distro!'
           fi
