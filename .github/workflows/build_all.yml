@@ -83,18 +83,12 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          cli_args=""
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            cli_args+=" --package-manager=micromamba"
-          fi
-          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
-
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw $cli_args
+          python -m pyproject_external --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped $cli_args
+          python -m pyproject_external --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          echo "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         run: |
@@ -213,18 +207,12 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          cli_args=""
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            cli_args+=" --package-manager=micromamba"
-          fi
-          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
-
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw $cli_args
+          python -m pyproject_external --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped $cli_args
+          python -m pyproject_external --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          echo "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
