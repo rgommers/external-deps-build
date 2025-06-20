@@ -1,7 +1,7 @@
 [external]
 build-requires = [
   "dep:virtual/compiler/c",
-  "dep:virtual/compiler/cpp",
+  "dep:virtual/compiler/cxx",
   "dep:virtual/compiler/fortran",
   "dep:generic/ninja",
   "dep:generic/pkg-config",
