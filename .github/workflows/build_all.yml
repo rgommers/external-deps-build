@@ -74,7 +74,7 @@ jobs:
           ls -alh sdist/
           ls -alh sdist/_amended
 
-      - name: Install external dependencies
+      - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -94,8 +94,7 @@ jobs:
           echo "Mapped external metadata:"
           python -m pyproject_external --output=mapped $cli_args
           echo "Install command:"
-          set +x
-          eval "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external --output=command $cli_args)"
 
       - name: Build from sdist
         run: |
@@ -105,7 +104,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
+          python -m pyproject_external.install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Import installed package
         run: |
@@ -205,7 +204,7 @@ jobs:
           ls -alh sdist/
           ls -alh sdist/_amended
 
-      - name: Install external dependencies
+      - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -225,8 +224,7 @@ jobs:
           echo "Mapped external metadata:"
           python -m pyproject_external --output=mapped $cli_args
           echo "Install command:"
-          set +x
-          eval "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external --output=command $cli_args)"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
@@ -243,7 +241,7 @@ jobs:
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
+          python -m pyproject_external.install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
