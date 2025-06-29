@@ -100,8 +100,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pyproject_external build sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
-          python -m pip install *-*.whl --force-reinstall 
+          python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Import installed package
         run: |
@@ -234,8 +233,7 @@ jobs:
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pyproject_external build sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
-          python -m pip install *-*.whl --force-reinstall 
+          python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
