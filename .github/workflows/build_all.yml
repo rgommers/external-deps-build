@@ -86,11 +86,11 @@ jobs:
           name=${{ matrix.pkgdata[0]}}
 
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw ./sdist/_amended/$name-*.tar.gz
+          python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped ./sdist/_amended/$name-*.tar.gz
+          python -m pyproject_external show --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          echo "$(python -m pyproject_external --output=command ./sdist/_amended/$name-*.tar.gz)"
+          echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         run: |
@@ -100,7 +100,8 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pyproject_external.install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
+          python -m pyproject_external build sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
+          python -m pip install ${{ matrix.pkgdata[0] }}-*.whl
 
       - name: Import installed package
         run: |
@@ -212,11 +213,11 @@ jobs:
           name=${{ matrix.pkgdata[0]}}
 
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw ./sdist/_amended/$name-*.tar.gz
+          python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped ./sdist/_amended/$name-*.tar.gz
+          python -m pyproject_external show --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          echo "$(python -m pyproject_external --output=command ./sdist/_amended/$name-*.tar.gz)"
+          echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
@@ -233,7 +234,8 @@ jobs:
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pyproject_external.install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
+          python -m pyproject_external build sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
+          python -m pip install ${{ matrix.pkgdata[0] }}-*.whl
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
