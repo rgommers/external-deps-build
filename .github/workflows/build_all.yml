@@ -71,9 +71,7 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install -r requirements.txt
-          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
-          ls -alh sdist/
+          python -m pyproject_external prepare --outdir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies
@@ -197,9 +195,7 @@ jobs:
             source venv/bin/activate
           fi
 
-          python -m pip install -r requirements.txt
-          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
-          ls -alh sdist/
+          python -m pyproject_external prepare --outdir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies

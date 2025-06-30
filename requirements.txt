@@ -1,2 +1,1 @@
-pypi_json
-https://github.com/jaimergp/pyproject-external/archive/install.tar.gz
+https://github.com/jaimergp/pyproject-external/archive/prepare.tar.gz
