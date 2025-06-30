@@ -72,7 +72,7 @@ jobs:
           fi
 
           python -m pip install -r requirements.txt
-          python -m pyproject_external prepare --outdir=sdist/_amended ${{ matrix.pkgdata[0]}}
+          python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies
@@ -197,7 +197,7 @@ jobs:
           fi
 
           python -m pip install -r requirements.txt
-          python -m pyproject_external prepare --outdir=sdist/_amended ${{ matrix.pkgdata[0]}}
+          python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies
