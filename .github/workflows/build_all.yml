@@ -8,7 +8,6 @@ on:
       - .github/workflows/build_all.yml
       - .github/.mambarc
       - external_metadata/
-      - scripts/download_and_patch_sdist.yml
       - requirements.txt
   workflow_dispatch:
 
@@ -50,14 +49,16 @@ jobs:
       - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python git  # will install 3.12
+            sudo dnf install -y python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python git sudo --noconfirm # will install 3.11
+            pacman -Syu python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip git  # will install 3.12
+            micromamba create -n cfenv python pip  # will install 3.12
+            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
+            echo "${HOME}/.local/bin" >> $GITHUB_PATH
           fi
 
       - name: Download and patch sdist
@@ -70,11 +71,10 @@ jobs:
           fi
 
           python -m pip install -r requirements.txt
-          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
-          ls -alh sdist/
+          python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
-      - name: Install external dependencies
+      - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -83,19 +83,12 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          cli_args=""
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            cli_args+=" --package-manager=micromamba"
-          fi
-          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
-
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw $cli_args
+          python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped $cli_args
+          python -m pyproject_external show --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          set +x
-          eval "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         run: |
@@ -105,7 +98,7 @@ jobs:
             source venv/bin/activate
           fi
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
+          python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Import installed package
         run: |
@@ -179,14 +172,16 @@ jobs:
       - name: Install system Python
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python git  # will install 3.12
+            sudo dnf install -y python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python git sudo --noconfirm # will install 3.11
+            pacman -Syu python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip git  # will install 3.12
+            micromamba create -n cfenv python pip  # will install 3.12
+            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
+            echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else
             echo 'Unsupported distro!'
           fi
@@ -201,11 +196,10 @@ jobs:
           fi
 
           python -m pip install -r requirements.txt
-          python scripts/download_and_patch_sdist.py ${{ matrix.pkgdata[0]}}
-          ls -alh sdist/
+          python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
-      - name: Install external dependencies
+      - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -214,19 +208,12 @@ jobs:
           fi
           name=${{ matrix.pkgdata[0]}}
 
-          cli_args=""
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            cli_args+=" --package-manager=micromamba"
-          fi
-          cli_args+=" ./sdist/_amended/$name-*.tar.gz"
-
           echo "Raw external metadata:"
-          python -m pyproject_external --output=raw $cli_args
+          python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
-          python -m pyproject_external --output=mapped $cli_args
+          python -m pyproject_external show --output=mapped ./sdist/_amended/$name-*.tar.gz
           echo "Install command:"
-          set +x
-          eval "$(python -m pyproject_external --output=command $cli_args)"
+          echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
@@ -243,7 +230,7 @@ jobs:
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
-          python -m pip install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz -v
+          python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
