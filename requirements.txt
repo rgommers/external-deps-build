@@ -1,1 +1,1 @@
-https://github.com/jaimergp/pyproject-external/archive/prepare.tar.gz
+https://github.com/jaimergp/pyproject-external/archive/main.tar.gz
