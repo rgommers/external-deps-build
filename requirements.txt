@@ -1,1 +1,1 @@
-https://github.com/jaimergp/pyproject-external/archive/main.tar.gz
+pyproject-external
