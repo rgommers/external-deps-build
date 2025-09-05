@@ -59,7 +59,7 @@ The [scripts](scripts/), CI setup and results in the repo basically do the follo
 
 ## Results
 
-*These are the main results as of <!-- DATE -->12 Jun 2025<!-- /DATE -->.*
+*These are the main results as of <!-- DATE -->05 Sep 2025<!-- /DATE -->.*
 
 Overall number of successful builds per distro:
 
@@ -77,18 +77,18 @@ Average CI job duration per package for the heaviest builds:
 <!-- DURATION_TABLE -->
 | package       | duration   |
 |:--------------|:-----------|
-| grpcio        | 13m 43s    |
-| scipy         | 13m 37s    |
-| pyarrow       | 7m 11s     |
-| grpcio-tools  | 6m 11s     |
-| pandas        | 4m 55s     |
-| scikit-learn  | 4m 38s     |
-| numpy         | 4m 17s     |
-| pynacl        | 3m 5s      |
+| grpcio        | 16m 59s    |
+| scipy         | 13m 4s     |
+| pyarrow       | 7m 16s     |
+| grpcio-tools  | 6m 10s     |
+| pandas        | 5m 5s      |
+| numpy         | 4m 24s     |
+| scikit-learn  | 3m 47s     |
+| pynacl        | 3m 10s     |
 | pydantic-core | 2m 39s     |
-| lxml          | 2m 11s     |
-| matplotlib    | 1m 54s     |
-| cryptography  | 1m 30s     |
+| lxml          | 2m 8s      |
+| matplotlib    | 2m 4s      |
+| cryptography  | 1m 49s     |
 <!-- /DURATION_TABLE -->
 
 
@@ -110,7 +110,7 @@ Per-package success/failure:
 | sqlalchemy         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | aiohttp            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | grpcio             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pyarrow            | :heavy_check_mark: | :x:                | :x:                |
+| pyarrow            | :heavy_check_mark: | :heavy_check_mark: | :x:                |
 | wrapt              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | frozenlist         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | coverage           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -118,7 +118,7 @@ Per-package success/failure:
 | greenlet           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | yarl               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | multidict          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| scipy              | :heavy_check_mark: | :heavy_check_mark: | :x:                |
+| scipy              | :heavy_check_mark: | :x:                | :x:                |
 | httptools          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | pynacl             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | psycopg2-binary    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
