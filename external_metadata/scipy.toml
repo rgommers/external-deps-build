@@ -5,6 +5,7 @@ build-requires = [
   "dep:virtual/compiler/fortran",
   "dep:generic/ninja",
   "dep:generic/pkg-config",
+  "dep:generic/cmake",
 ]
 
 host-requires = [
