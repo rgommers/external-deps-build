@@ -63,7 +63,7 @@ jobs:
 
       - name: Download and patch sdist
         env:
-          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYPROJECT_EXTERNAL: "0.1.10"
+          SETUPTOOLS_SCM_PRETEND_VERSION: "0.1.10"
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
@@ -190,7 +190,7 @@ jobs:
 
       - name: Download and patch sdist
         env:
-          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYPROJECT_EXTERNAL: "0.1.10"
+          SETUPTOOLS_SCM_PRETEND_VERSION: "0.1.10"
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
