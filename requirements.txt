@@ -1,1 +1,1 @@
-pyproject-external
+https://github.com/jaimergp/pyproject-external/archive/validate-version.tar.gz
