@@ -56,7 +56,7 @@ jobs:
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo python3 python-is-python3
+            apt install -y sudo python3 python-is-python3 python3-venv
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
@@ -184,7 +184,7 @@ jobs:
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             sudo apt update
             sudo apt upgrade
-            sudo apt install python3 python-is-python3
+            sudo apt install python3 python-is-python3 python3-venv
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
