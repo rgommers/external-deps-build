@@ -38,9 +38,10 @@ jobs:
           - ["archlinux:latest", "Arch"]
           - ["fedora:40", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
+          - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
@@ -52,6 +53,10 @@ jobs:
             sudo dnf install -y python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
             pacman -Syu python sudo --noconfirm # will install 3.11
+          elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
+            apt update
+            apt upgrade -y
+            apt install -y sudo python3 python-is-python3 python3-venv
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
@@ -124,6 +129,7 @@ jobs:
           - ["archlinux:latest", "Arch", true]
           - ["fedora:40", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
+          - ["ubuntu:24.04", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
@@ -163,7 +169,7 @@ jobs:
           - [grpcio-tools, grpc]
           - [pycryptodomex, Cryptodome]
           - [google-crc32c, google_crc32c]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
     steps:
@@ -175,6 +181,10 @@ jobs:
             sudo dnf install -y python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
             pacman -Syu python sudo --noconfirm # will install 3.11
+          elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
+            apt update
+            apt upgrade -y
+            apt install -y sudo python3 python-is-python3 python3-venv
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
