@@ -38,11 +38,11 @@ jobs:
           # - ["archlinux:latest", "Arch"]
           # - ["fedora:40", "Fedora"]
           # - ["archlinux:latest", "conda-forge"]
-          - ["", "Ubuntu"]
+          - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
     runs-on: ubuntu-latest
-    container: ${{ matrix.platform[0] && matrix.platform[0] || null }}
+    container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
@@ -125,7 +125,7 @@ jobs:
           # - ["archlinux:latest", "Arch", true]
           # - ["fedora:40", "Fedora", true]
           # - ["archlinux:latest", "conda-forge", true]
-          - ["", "Ubuntu", true]
+          - ["ubuntu:24.04", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
@@ -166,7 +166,7 @@ jobs:
           - [pycryptodomex, Cryptodome]
           - [google-crc32c, google_crc32c]
     runs-on: ubuntu-latest
-    container: ${{ matrix.platform[0] && matrix.platform[0] || null }}
+    container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
@@ -220,9 +220,6 @@ jobs:
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
         run: |
-          if [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
-            sudo apt -f install  # fix libjpeg absence?
-          fi
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
