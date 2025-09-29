@@ -35,9 +35,9 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          # - ["archlinux:latest", "Arch"]
-          # - ["fedora:40", "Fedora"]
-          # - ["archlinux:latest", "conda-forge"]
+          - ["archlinux:latest", "Arch"]
+          - ["fedora:40", "Fedora"]
+          - ["archlinux:latest", "conda-forge"]
           - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
@@ -126,9 +126,9 @@ jobs:
           # use-external=false will have a lot of failures; only uncomment if
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
-          # - ["archlinux:latest", "Arch", true]
-          # - ["fedora:40", "Fedora", true]
-          # - ["archlinux:latest", "conda-forge", true]
+          - ["archlinux:latest", "Arch", true]
+          - ["fedora:40", "Fedora", true]
+          - ["archlinux:latest", "conda-forge", true]
           - ["ubuntu:24.04", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
