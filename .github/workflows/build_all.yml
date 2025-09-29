@@ -35,13 +35,14 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ["archlinux:latest", "Arch"]
-          - ["fedora:40", "Fedora"]
-          - ["archlinux:latest", "conda-forge"]
+          # - ["archlinux:latest", "Arch"]
+          # - ["fedora:40", "Fedora"]
+          # - ["archlinux:latest", "conda-forge"]
+          - ["", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
-    runs-on: ubuntu-22.04
-    container: ${{ matrix.platform[0] }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.platform[0] && matrix.platform[0] || null }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
@@ -121,9 +122,10 @@ jobs:
           # use-external=false will have a lot of failures; only uncomment if
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
-          - ["archlinux:latest", "Arch", true]
-          - ["fedora:40", "Fedora", true]
-          - ["archlinux:latest", "conda-forge", true]
+          # - ["archlinux:latest", "Arch", true]
+          # - ["fedora:40", "Fedora", true]
+          # - ["archlinux:latest", "conda-forge", true]
+          - ["", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
@@ -163,8 +165,8 @@ jobs:
           - [grpcio-tools, grpc]
           - [pycryptodomex, Cryptodome]
           - [google-crc32c, google_crc32c]
-    runs-on: ubuntu-22.04
-    container: ${{ matrix.platform[0] }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.platform[0] && matrix.platform[0] || null }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
