@@ -54,9 +54,9 @@ jobs:
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
             pacman -Syu python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
-            sudo apt update
-            sudo apt upgrade
-            sudo apt install python3  
+            apt update
+            apt upgrade
+            apt install sudo python3  
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
