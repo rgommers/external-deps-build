@@ -41,6 +41,7 @@ jobs:
           - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
           - [bcrypt, bcrypt]
+          - [rpds-py, rpds]
     runs-on: ubuntu-latest
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
