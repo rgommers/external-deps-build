@@ -36,7 +36,7 @@ jobs:
       matrix:
         platform:
           - ["archlinux:latest", "Arch"]
-          - ["fedora:40", "Fedora"]
+          - ["fedora:42", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
           - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
@@ -127,7 +127,7 @@ jobs:
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
           - ["archlinux:latest", "Arch", true]
-          - ["fedora:40", "Fedora", true]
+          - ["fedora:42", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
           - ["ubuntu:24.04", "Ubuntu", true]
         pkgdata:
