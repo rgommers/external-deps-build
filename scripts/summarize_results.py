@@ -12,6 +12,7 @@ import os
 import re
 import json
 import subprocess
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -37,9 +38,9 @@ def last_run_id() -> int:
 def download_latest_gha_run_data(run_id: int, token: str) -> list[dict]:
     url = f"https://api.github.com/repos/rgommers/external-deps-build/actions/runs/{run_id}/jobs"
     data = []
-    for page in (1, 2):
+    for page in range(1, 8):
         r = requests.get(
-            f"{url}?per_page=100&page={page}",
+            f"{url}?per_page=30&page={page}",
             headers={
                 "X-GitHub-Api-Version":"2022-11-28",
                 "Authorization": f"Bearer {token}",
@@ -47,6 +48,7 @@ def download_latest_gha_run_data(run_id: int, token: str) -> list[dict]:
         )
         r.raise_for_status()
         data += r.json()["jobs"]
+        time.sleep(0.1)
     return data
 
 
