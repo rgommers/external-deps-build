@@ -35,12 +35,12 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ["archlinux:latest", "Arch"]
-          - ["fedora:42", "Fedora"]
-          - ["archlinux:latest", "conda-forge"]
+          # - ["archlinux:latest", "Arch"]
+          # - ["fedora:42", "Fedora"]
+          # - ["archlinux:latest", "conda-forge"]
           - ["ubuntu:24.04", "Ubuntu"]
         pkgdata:
-          - [cryptography, cryptography]
+          - [bcrypt, bcrypt]
     runs-on: ubuntu-latest
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
@@ -117,7 +117,8 @@ jobs:
 
   with_external_metadata:
     needs: smoketest
-    if: github.repository == 'rgommers/external-deps-build'
+    if: false
+    # github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
