@@ -59,7 +59,7 @@ The [scripts](scripts/), CI setup and results in the repo basically do the follo
 
 ## Results
 
-*These are the main results as of <!-- DATE -->05 Sep 2025<!-- /DATE -->.*
+*These are the main results as of <!-- DATE -->30 Sep 2025<!-- /DATE -->.*
 
 Overall number of successful builds per distro:
 
@@ -67,7 +67,8 @@ Overall number of successful builds per distro:
 | distro      | success   |
 |:------------|:----------|
 | Arch        | 36/37     |
-| Fedora      | 34/37     |
+| Fedora      | 35/37     |
+| Ubuntu      | 34/37     |
 | conda-forge | 36/37     |
 <!-- /DISTRO_TABLE -->
 
@@ -77,63 +78,63 @@ Average CI job duration per package for the heaviest builds:
 <!-- DURATION_TABLE -->
 | package       | duration   |
 |:--------------|:-----------|
-| grpcio        | 16m 59s    |
-| scipy         | 13m 4s     |
-| pyarrow       | 7m 16s     |
-| grpcio-tools  | 6m 10s     |
-| pandas        | 5m 5s      |
-| numpy         | 4m 24s     |
-| scikit-learn  | 3m 47s     |
-| pynacl        | 3m 10s     |
-| pydantic-core | 2m 39s     |
-| lxml          | 2m 8s      |
-| matplotlib    | 2m 4s      |
-| cryptography  | 1m 49s     |
+| grpcio        | 16m 20s    |
+| scipy         | 12m 28s    |
+| pyarrow       | 7m 22s     |
+| grpcio-tools  | 5m 56s     |
+| pandas        | 4m 54s     |
+| numpy         | 4m 12s     |
+| pydantic-core | 3m 52s     |
+| scikit-learn  | 3m 31s     |
+| pynacl        | 2m 31s     |
+| lxml          | 2m 14s     |
+| matplotlib    | 1m 52s     |
+| cryptography  | 1m 24s     |
 <!-- /DURATION_TABLE -->
 
 
 Per-package success/failure:
 
 <!-- SUCCESS_TABLE -->
-| package            | Arch               | conda-forge        | Fedora             |
-|:-------------------|:-------------------|:-------------------|:-------------------|
-| charset-normalizer | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| cryptography       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pyyaml             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| numpy              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| protobuf           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pandas             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| markupsafe         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| cffi               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| psutil             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| lxml               | :x:                | :heavy_check_mark: | :x:                |
-| sqlalchemy         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| aiohttp            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| grpcio             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pyarrow            | :heavy_check_mark: | :heavy_check_mark: | :x:                |
-| wrapt              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| frozenlist         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| coverage           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pillow             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| greenlet           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| yarl               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| multidict          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| scipy              | :heavy_check_mark: | :x:                | :x:                |
-| httptools          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pynacl             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| psycopg2-binary    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| rpds-py            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| bcrypt             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| scikit-learn       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| msgpack            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| matplotlib         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| regex              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| kiwisolver         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pydantic-core      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pyrsistent         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| grpcio-tools       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| pycryptodomex      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| google-crc32c      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| package            | Arch               | conda-forge        | Ubuntu             | Fedora             |
+|:-------------------|:-------------------|:-------------------|:-------------------|:-------------------|
+| charset-normalizer | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| cryptography       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pyyaml             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| numpy              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| protobuf           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pandas             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| markupsafe         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| cffi               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| psutil             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| lxml               | :x:                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| sqlalchemy         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| aiohttp            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| grpcio             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pyarrow            | :heavy_check_mark: | :heavy_check_mark: | :x:                | :x:                |
+| wrapt              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| frozenlist         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| coverage           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pillow             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| greenlet           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| yarl               | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| multidict          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| scipy              | :heavy_check_mark: | :x:                | :x:                | :x:                |
+| httptools          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pynacl             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| psycopg2-binary    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| rpds-py            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| bcrypt             | :heavy_check_mark: | :heavy_check_mark: | :x:                | :heavy_check_mark: |
+| scikit-learn       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| msgpack            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| matplotlib         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| regex              | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| kiwisolver         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pydantic-core      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pyrsistent         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| grpcio-tools       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| pycryptodomex      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| google-crc32c      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 <!-- /SUCCESS_TABLE -->
 
 
