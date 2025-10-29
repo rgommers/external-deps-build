@@ -1,1 +1,1 @@
-pyproject-external @ git+https://github.com/jaimergp/pyproject-external.git@build-host-requires
+pyproject-external>=0.1.12
