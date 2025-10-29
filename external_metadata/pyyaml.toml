@@ -3,6 +3,6 @@ build-requires = [
   "dep:virtual/compiler/c",
 ]
 
-host-requires = [
+build-host-requires = [
   "dep:generic/libyaml",
 ]

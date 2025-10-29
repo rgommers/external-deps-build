@@ -7,7 +7,7 @@ build-requires = [
   "dep:generic/pkg-config",
 ]
 
-host-requires = [
+build-host-requires = [
   "dep:virtual/interface/blas",
   "dep:virtual/interface/lapack",
 ]
