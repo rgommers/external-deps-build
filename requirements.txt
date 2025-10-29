@@ -1,1 +1,1 @@
-pyproject-external
+pyproject-external @ https://github.com/jaimergp/pyproject-external/archive/build-host-requires.tar.gz
