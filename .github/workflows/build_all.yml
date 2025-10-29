@@ -50,18 +50,18 @@ jobs:
       - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python sudo git --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo python3 python-is-python3 python3-venv
+            apt install -y sudo python3 python-is-python3 python3-venv git
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv python pip git  # will install 3.12
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           fi
@@ -178,18 +178,18 @@ jobs:
       - name: Install system Python
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y python git  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu python sudo git --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo python3 python-is-python3 python3-venv
+            apt install -y sudo python3 python-is-python3 python3-venv git
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv python pip git  # will install 3.12
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else
