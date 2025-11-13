@@ -2,7 +2,7 @@
 build-requires = [
   "dep:virtual/compiler/c",
 ]
-host-requires = [
+build-host-requires = [
   "dep:generic/libxml2",
   "dep:generic/libxslt",
   "dep:generic/zlib",

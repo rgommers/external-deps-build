@@ -1,1 +1,1 @@
-pyproject-external
+pyproject-external>=0.1.12
