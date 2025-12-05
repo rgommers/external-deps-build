@@ -329,7 +329,6 @@ jobs:
           echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
 
       - name: Cross-compile from sdist
-        if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             source ~/.bashrc && micromamba activate cfenv
