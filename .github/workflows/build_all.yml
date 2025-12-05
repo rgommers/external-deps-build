@@ -275,6 +275,44 @@ jobs:
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
+          - [pyyaml, yaml]  # poor detection of libyaml, falls back to pure Python on conda-forge
+          - [lxml, lxml]    # doesn't work, no pyproject.toml + absolute import in setup.py
+          - [greenlet, greenlet]
+          - [httptools, httptools]
+          - [markupsafe, markupsafe]
+          - [grpcio, grpc]  # doesn't work, no pyproject.toml + absolute import in setup.py
+          - [sqlalchemy, sqlalchemy]
+          - [wrapt, wrapt]
+          - [protobuf, google.protobuf]
+          - [charset-normalizer, charset_normalizer]  # falls back to pure Python on conda-forge
+          - [pillow, PIL]
+          - [cffi, cffi]
+          - [frozenlist, frozenlist]
+          - [multidict, multidict]
+          - [coverage, coverage]
+          - [yarl, yarl]
+          - [aiohttp, aiohttp]  # doesn't build on Python 3.12 yet
+          - [psutil, psutil]
+          - [numpy, numpy]
+          - [pandas, pandas]
+          - [scipy, scipy]  # Failing on Fedora because no auto-detection of FlexiBLAS yet
+          - [pyarrow, pyarrow]
+          - [pynacl, nacl]
+          - [psycopg2-binary, psycopg2]
+          - [rpds-py, rpds]
+          - [bcrypt, bcrypt]
+          - [scikit-learn, sklearn]
+          - [msgpack, msgpack]
+          - [matplotlib, matplotlib]  # Failing on conda-forge, missing Freetype symbols.
+          - [regex, regex]
+          - [kiwisolver, kiwisolver]
+          - [pydantic-core, pydantic_core]
+          - [pyrsistent, pyrsistent]
+          - [grpcio-tools, grpc]
+          - [pycryptodomex, Cryptodome]
+          - [google-crc32c, google_crc32c]
+    env:
+      _TYPER_STANDARD_TRACEBACK: "1"
     steps:
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
