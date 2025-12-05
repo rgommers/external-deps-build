@@ -1,1 +1,2 @@
-pyproject-external>=0.1.12
+# pyproject-external>=0.1.12
+pyproject-external @ https://github.com/jaimergp/pyproject-external/archive/cross-compile.tar.gz

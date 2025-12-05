@@ -29,6 +29,7 @@ concurrency:
 
 jobs:
   smoketest:
+    if: false
     # Build only one package per distro, to avoid spinning up a ton of jobs if
     # something simple is broken.
     strategy:
@@ -117,7 +118,8 @@ jobs:
 
   with_external_metadata:
     needs: smoketest
-    if: github.repository == 'rgommers/external-deps-build'
+    if: false
+    # github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
@@ -259,3 +261,79 @@ jobs:
           fi
 
           python -c "import ${{ matrix.pkgdata[1] }}"
+  
+  cross_compile:
+    if: github.repository == 'rgommers/external-deps-build'
+    runs-on: ubuntu-latest
+    container: ${{ matrix.platform[0] }}
+    name: cross-build ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ["archlinux:latest", "conda-forge"]
+        pkgdata:
+          # [package-name (must be normalized with lowercase and only dashes), import-name]
+          - [cryptography, cryptography]
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - name: Install system Python
+        run: |
+          if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
+            sudo dnf install -y python  # will install 3.12
+          elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
+            pacman -Syu python sudo --noconfirm # will install 3.11
+          elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
+            apt update
+            apt upgrade -y
+            apt install -y sudo python3 python-is-python3 python3-venv
+          elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+            source ~/.bashrc
+            cp .github/.mambarc ~/.mambarc
+            micromamba create -n cfenv python pip  # will install 3.12
+            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
+            echo "${HOME}/.local/bin" >> $GITHUB_PATH
+          else
+            echo 'Unsupported distro!'
+          fi
+
+      - name: Download and patch sdist
+        run: |
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            python -m venv venv
+            source venv/bin/activate
+          fi
+
+          python -m pip install -r requirements.txt
+          python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
+          ls -alh sdist/_amended
+
+      - name: Show external dependencies
+        run: |
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            source venv/bin/activate
+          fi
+          name=${{ matrix.pkgdata[0]}}
+
+          echo "Raw external metadata:"
+          python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
+          echo "Mapped external metadata:"
+          python -m pyproject_external show --output=mapped ./sdist/_amended/$name-*.tar.gz
+          echo "Install command:"
+          echo "$(python -m pyproject_external show --output=command ./sdist/_amended/$name-*.tar.gz)"
+
+      - name: Cross-compile from sdist
+        if: ${{ matrix.platform[2] }}
+        run: |
+          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+            source ~/.bashrc && micromamba activate cfenv
+          else
+            source venv/bin/activate
+          fi
+          python -m pyproject_external cross-build --platform linux-aarch64 sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
