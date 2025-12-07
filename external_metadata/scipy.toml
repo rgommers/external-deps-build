@@ -3,6 +3,7 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:virtual/compiler/cxx",
   "dep:virtual/compiler/fortran",
+  "dep:generic/cmake",
   "dep:generic/ninja",
   "dep:generic/pkg-config",
 ]
