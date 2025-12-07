@@ -4,3 +4,7 @@ build-requires = [
   "dep:virtual/compiler/cxx",
   "dep:generic/ninja",
 ]
+
+[tool.pyproject-external.cross-build-env-vars]
+NINJA = "{build_prefix}/bin/ninja"
+MESON = "{build_prefix}/bin/meson"
