@@ -13,4 +13,3 @@ build-host-requires = [
 
 [tool.pyproject-external.cross-build-env-vars]
 NINJA = "{build_prefix}/bin/ninja"
-MESON = "{build_prefix}/bin/meson"
