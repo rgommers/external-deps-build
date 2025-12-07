@@ -3,6 +3,7 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:virtual/compiler/cxx",
   "dep:generic/ninja",
+  "dep:generic/pkg-config",
 ]
 
 [tool.pyproject-external.cross-build-env-vars]
