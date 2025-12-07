@@ -19,3 +19,6 @@ build-host-requires = [
 # are installed, so we don't list them here to keep the install of system
 # dependencies leaner.
 # [external.optional-build-requires]
+
+[tool.pyproject-external.cross-build-env-vars]
+PYARROW_CMAKE_OPTIONS = "-DARROW_SIMD_LEVEL=NONE"
