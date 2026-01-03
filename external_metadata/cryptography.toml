@@ -4,7 +4,7 @@ build-requires = [
   "dep:virtual/compiler/rust",
   "dep:generic/pkg-config",
 ]
-build-host-requires = [
+host-requires = [
   "dep:generic/openssl",
   "dep:generic/libffi",
 ]

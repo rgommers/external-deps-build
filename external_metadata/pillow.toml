@@ -2,12 +2,12 @@
 build-requires = [
   "dep:virtual/compiler/c",
 ]
-build-host-requires = [
+host-requires = [
   "dep:generic/libjpeg",
   "dep:generic/zlib",
 ]
 
-[external.optional-build-host-requires]
+[external.optional-host-requires]
 extra = [
   "dep:generic/lcms2",
   "dep:generic/freetype",

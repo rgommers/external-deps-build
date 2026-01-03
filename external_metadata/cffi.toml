@@ -2,6 +2,6 @@
 build-requires = [
   "dep:virtual/compiler/c",
 ]
-build-host-requires = [
+host-requires = [
   "dep:generic/libffi",
 ]
