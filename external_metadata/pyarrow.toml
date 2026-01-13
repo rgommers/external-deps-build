@@ -6,7 +6,7 @@ build-requires = [
   "dep:generic/clang",
 ]
 
-build-host-requires = [
+host-requires = [
   "dep:github/apache/arrow",
   "dep:generic/zlib",
   "dep:generic/llvm@<20",
