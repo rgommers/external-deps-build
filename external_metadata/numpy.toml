@@ -10,3 +10,6 @@ host-requires = [
   "dep:virtual/interface/blas",
   "dep:virtual/interface/lapack",
 ]
+
+[tool.pyproject-external.cross-build-env-vars]
+NINJA = "{build_prefix}/bin/ninja"

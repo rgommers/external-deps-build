@@ -1,1 +1,2 @@
-pyproject-external>=0.1.12
+# pyproject-external>=0.1.12
+git+https://github.com/jaimergp/pyproject-external.git@cross-compile#egg=pyproject-external

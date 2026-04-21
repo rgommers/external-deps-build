@@ -4,6 +4,8 @@ build-requires = [
   "dep:virtual/compiler/cxx",
   "dep:generic/cmake",
   "dep:generic/clang",
+  "dep:generic/make",
+  "dep:generic/ninja",
 ]
 
 host-requires = [
@@ -16,8 +18,7 @@ host-requires = [
 # setup.py), but a plain `pip install` defaults to not using those even if they
 # are installed, so we don't list them here to keep the install of system
 # dependencies leaner.
-[external.optional-build-requires]
-extra = [
-  "dep:generic/make",
-  "dep:generic/ninja",
-]
+# [external.optional-build-requires]
+
+[tool.pyproject-external.cross-build-env-vars]
+PYARROW_CMAKE_OPTIONS = "-DARROW_SIMD_LEVEL=NONE"

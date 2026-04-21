@@ -8,3 +8,6 @@ host-requires = [
   "dep:generic/openssl",
   "dep:generic/libffi",
 ]
+
+[tool.pyproject-external.cross-build-env-vars]
+OPENSSL_DIR = "{prefix}"

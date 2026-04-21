@@ -1,6 +1,7 @@
 [external]
 build-requires = [
   "dep:virtual/compiler/c",
+  "dep:generic/libpq",  # need pg_config for cross compilation
 ]
 
 host-requires = [

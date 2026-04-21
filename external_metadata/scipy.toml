@@ -3,6 +3,7 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:virtual/compiler/cxx",
   "dep:virtual/compiler/fortran",
+  "dep:generic/cmake",
   "dep:generic/ninja",
   "dep:generic/pkg-config",
 ]
@@ -11,3 +12,6 @@ host-requires = [
   "dep:virtual/interface/blas",
   "dep:virtual/interface/lapack",
 ]
+
+[tool.pyproject-external.cross-build-env-vars]
+NINJA = "{build_prefix}/bin/ninja"

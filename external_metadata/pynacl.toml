@@ -3,3 +3,10 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:generic/make",
 ]
+
+build-host-requires = [
+  "dep:generic/libsodium",
+]
+
+[tool.pyproject-external.cross-build-env-vars]
+SODIUM_INSTALL = "system"
