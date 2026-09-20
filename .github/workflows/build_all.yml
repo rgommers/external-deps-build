@@ -38,7 +38,7 @@ jobs:
           - ["archlinux:latest", "Arch"]
           - ["fedora:42", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
-          - ["ubuntu:24.04", "Ubuntu"]
+          - ["ubuntu:26.04", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
     runs-on: ubuntu-latest
@@ -132,7 +132,7 @@ jobs:
           - ["archlinux:latest", "Arch", true]
           - ["fedora:42", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
-          - ["ubuntu:24.04", "Ubuntu", true]
+          - ["ubuntu:26.04", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
