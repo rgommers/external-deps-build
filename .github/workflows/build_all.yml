@@ -45,23 +45,26 @@ jobs:
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y git python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu git python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo python3 python-is-python3 python3-venv
+            apt install -y sudo git python3 python-is-python3 python3-venv curl
+            # We need a more recent cargo than the default 1.75, and it needs to shadow PATH
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv git python pip  # will install 3.12
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           fi
@@ -149,7 +152,7 @@ jobs:
           - [multidict, multidict]
           - [coverage, coverage]
           - [yarl, yarl]
-          - [aiohttp, aiohttp]  # doesn't build on Python 3.12 yet
+          - [aiohttp, aiohttp]
           - [psutil, psutil]
           - [numpy, numpy]
           - [pandas, pandas]
@@ -161,7 +164,7 @@ jobs:
           - [bcrypt, bcrypt]
           - [scikit-learn, sklearn]
           - [msgpack, msgpack]
-          - [matplotlib, matplotlib]  # Failing on conda-forge, missing Freetype symbols.
+          - [matplotlib, matplotlib]
           - [regex, regex]
           - [kiwisolver, kiwisolver]
           - [pydantic-core, pydantic_core]
@@ -173,23 +176,28 @@ jobs:
     container: ${{ matrix.platform[0] }}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install system Python
+      - name: Install system Python and git
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
-            sudo dnf install -y python  # will install 3.12
+            sudo dnf install -y git python  # will install 3.12
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu python sudo --noconfirm # will install 3.11
+            pacman -Syu git python sudo --noconfirm # will install 3.11
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo python3 python-is-python3 python3-venv
+            apt install -y sudo git python3 python-is-python3 python3-venv curl
+            if [[ ${{ matrix.pkgdata[0] }} == "cryptography" || ${{ matrix.pkgdata[0] }} == "rpds-py" || ${{ matrix.pkgdata[0] }} == "pydantic-core" ]]; then
+              # These packages need a more recent cargo than the default 1.75, and it needs to shadow PATH
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+              echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+            fi
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv python pip  # will install 3.12
+            micromamba create -n cfenv git python pip  # will install 3.12
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else

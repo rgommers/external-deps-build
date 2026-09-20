@@ -4,4 +4,5 @@ build-requires = [
   "dep:virtual/compiler/cxx",
   "dep:generic/make",
   "dep:generic/pkg-config",
+  "dep:generic/patch",
 ]
