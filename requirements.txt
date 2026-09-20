@@ -1,2 +1,3 @@
-# pyproject-external>=0.1.12
-git+https://github.com/jaimergp/pyproject-external.git@normalization-fixes#egg=pyproject-external
+pyproject-external>=0.1.16
+# Use this for debugging from open PRs
+# git+https://github.com/jaimergp/pyproject-external.git@BRANCH-NAME-HERE#egg=pyproject-external
