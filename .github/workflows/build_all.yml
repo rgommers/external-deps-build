@@ -38,7 +38,7 @@ jobs:
           - ["archlinux:latest", "Arch"]
           - ["fedora:44", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
-          - ["ubuntu:24.04", "Ubuntu"]
+          - ["ubuntu:26.04", "Ubuntu"]
         pkgdata:
           - [cryptography, cryptography]
     runs-on: ubuntu-latest
@@ -52,19 +52,16 @@ jobs:
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
             sudo dnf install -y git python  # will install 3.14
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu git python sudo --noconfirm # will install 3.11
+            pacman -Syu git python sudo --noconfirm # will install 3.14
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo git python3 python-is-python3 python3-venv curl
-            # We need a more recent cargo than the default 1.75, and it needs to shadow PATH
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-            echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+            apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv git python pip  # will install 3.12
+            micromamba create -n cfenv git python pip  # will install 3.14
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           fi
@@ -132,7 +129,7 @@ jobs:
           - ["archlinux:latest", "Arch", true]
           - ["fedora:44", "Fedora", true]
           - ["archlinux:latest", "conda-forge", true]
-          - ["ubuntu:24.04", "Ubuntu", true]
+          - ["ubuntu:26.04", "Ubuntu", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
@@ -183,21 +180,16 @@ jobs:
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
             sudo dnf install -y git python  # will install 3.14
           elif [[ ${{ matrix.platform[1] }} == "Arch" ]]; then
-            pacman -Syu git python sudo --noconfirm # will install 3.11
+            pacman -Syu git python sudo --noconfirm # will install 3.14
           elif [[ ${{ matrix.platform[1] }} == "Ubuntu" ]]; then
             apt update
             apt upgrade -y
-            apt install -y sudo git python3 python-is-python3 python3-venv curl
-            if [[ ${{ matrix.pkgdata[0] }} == "cryptography" || ${{ matrix.pkgdata[0] }} == "rpds-py" || ${{ matrix.pkgdata[0] }} == "pydantic-core" ]]; then
-              # These packages need a more recent cargo than the default 1.75, and it needs to shadow PATH
-              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-              echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-            fi
+            apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
           elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv git python pip  # will install 3.12
+            micromamba create -n cfenv git python pip  # will install 3.14
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else

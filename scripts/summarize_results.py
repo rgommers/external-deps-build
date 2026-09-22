@@ -106,7 +106,7 @@ def table_durations(df_distros: pd.DataFrame) -> str:
 def table_successes(df_distros: pd.DataFrame, df_downloads: pd.DataFrame) -> str:
     _df = df_distros.merge(df_downloads).sort_values(by='download_rank').drop(columns='duration')
     table = _df.pivot_table(columns='distro', index='package', values='success', sort=False)
-    assert len(table) == 37
+    assert len(table) == 37, str(table)
     return table.map(lambda x: ':heavy_check_mark:' if x else ':x:').to_markdown()
 
 
