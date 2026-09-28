@@ -59,7 +59,7 @@ The [scripts](scripts/), CI setup and results in the repo basically do the follo
 
 ## Results
 
-*These are the main results as of <!-- DATE -->15 Jan 2026<!-- /DATE -->.*
+*These are the main results as of <!-- DATE -->25 Sep 2026<!-- /DATE -->.*
 
 Overall number of successful builds per distro:
 
@@ -68,7 +68,7 @@ Overall number of successful builds per distro:
 |:------------|:----------|
 | Arch        | 36/37     |
 | Fedora      | 35/37     |
-| Ubuntu      | 34/37     |
+| Ubuntu      | 35/37     |
 | conda-forge | 35/37     |
 <!-- /DISTRO_TABLE -->
 
@@ -78,18 +78,18 @@ Average CI job duration per package for the heaviest builds:
 <!-- DURATION_TABLE -->
 | package       | duration   |
 |:--------------|:-----------|
-| grpcio        | 18m 0s     |
-| scipy         | 12m 54s    |
-| pyarrow       | 7m 8s      |
-| grpcio-tools  | 5m 58s     |
-| pandas        | 4m 36s     |
-| pydantic-core | 4m 12s     |
-| numpy         | 4m 4s      |
-| scikit-learn  | 3m 5s      |
-| pynacl        | 2m 31s     |
-| lxml          | 2m 19s     |
-| matplotlib    | 2m 9s      |
-| cryptography  | 1m 37s     |
+| grpcio        | 15m 31s    |
+| scipy         | 8m 51s     |
+| grpcio-tools  | 6m 8s      |
+| pyarrow       | 4m 20s     |
+| numpy         | 4m 9s      |
+| pandas        | 3m 38s     |
+| scikit-learn  | 3m 14s     |
+| pydantic-core | 3m 13s     |
+| matplotlib    | 2m 40s     |
+| pynacl        | 2m 35s     |
+| lxml          | 2m 10s     |
+| cryptography  | 1m 41s     |
 <!-- /DURATION_TABLE -->
 
 
@@ -123,7 +123,7 @@ Per-package success/failure:
 | httptools          | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | pynacl             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | psycopg2-binary    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| rpds-py            | :heavy_check_mark: | :heavy_check_mark: | :x:                | :heavy_check_mark: |
+| rpds-py            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | bcrypt             | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | scikit-learn       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | msgpack            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
