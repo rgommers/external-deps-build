@@ -7,7 +7,7 @@ build-requires = [
 ]
 
 host-requires = [
-  "dep:github/apache/arrow",
+  "dep:generic/arrow",
   "dep:generic/zlib",
   "dep:generic/llvm@<20",
 ]

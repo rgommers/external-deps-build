@@ -7,7 +7,7 @@ on:
     paths:
       - .github/workflows/build_all.yml
       - .github/.mambarc
-      - external_metadata/
+      - external_metadata/**
       - requirements.txt
   workflow_dispatch:
 
