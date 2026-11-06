@@ -63,7 +63,10 @@ jobs:
             apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
           elif [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            test -f ~/.bashrc && source ~/.bashrc
+            if [[ ${{ matrix.platform[1] }} == *"-windows" ]]; then
+              cp ~/.bash_profile ~/.bashrc
+            fi
+            source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv git python=3.14 pip  # pinned to 3.14
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
@@ -73,7 +76,7 @@ jobs:
       - name: Download and patch sdist
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             python -m venv venv
             source venv/bin/activate
@@ -86,7 +89,7 @@ jobs:
       - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
@@ -102,7 +105,7 @@ jobs:
       - name: Build from sdist
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
@@ -112,7 +115,7 @@ jobs:
       - name: Import installed package
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
@@ -195,7 +198,10 @@ jobs:
             apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
           elif [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            test -f ~/.bashrc && source ~/.bashrc
+            if [[ ${{ matrix.platform[1] }} == *"-windows" ]]; then
+              cp ~/.bash_profile ~/.bashrc
+            fi
+            source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
             micromamba create -n cfenv git python=3.14 pip  # pinned to 3.14
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
@@ -207,7 +213,7 @@ jobs:
       - name: Download and patch sdist
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             python -m venv venv
             source venv/bin/activate
@@ -220,7 +226,7 @@ jobs:
       - name: Show external dependencies
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
@@ -237,7 +243,7 @@ jobs:
         if: ${{ matrix.platform[2] }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
@@ -261,7 +267,7 @@ jobs:
       - name: Import installed package
         run: |
           if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
-            test -f ~/.bashrc && source ~/.bashrc && micromamba activate cfenv
+            source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
           fi
