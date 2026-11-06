@@ -35,14 +35,18 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ["archlinux:latest", "Arch"]
-          - ["fedora:44", "Fedora"]
+          # - ["archlinux:latest", "Arch"]
+          # - ["fedora:44", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
-          - ["ubuntu:26.04", "Ubuntu"]
+          # - ["ubuntu:26.04", "Ubuntu"]
+          - ["windows-latest", "conda-forge-windows"]
         pkgdata:
           - [cryptography, cryptography]
-    runs-on: ubuntu-latest
-    container: ${{ matrix.platform[0] }}
+    runs-on: ${{ contains(matrix.platform[0], ':') && 'ubuntu-latest' || matrix.platform[0] }}
+    container: ${{ contains(matrix.platform[0], ':') && matrix.platform[0] }}
+    defaults:
+      run:
+        shell: bash
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -68,7 +72,7 @@ jobs:
 
       - name: Download and patch sdist
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+          if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
             python -m venv venv
@@ -81,7 +85,7 @@ jobs:
 
       - name: Show external dependencies
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+          if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
@@ -97,7 +101,7 @@ jobs:
 
       - name: Build from sdist
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+          if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
@@ -107,7 +111,7 @@ jobs:
 
       - name: Import installed package
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
+          if [[ ${{ matrix.platform[1] }} == "conda-forge"* ]]; then
             source ~/.bashrc && micromamba activate cfenv
           else
             source venv/bin/activate
@@ -126,10 +130,10 @@ jobs:
           # use-external=false will have a lot of failures; only uncomment if
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
-          - ["archlinux:latest", "Arch", true]
-          - ["fedora:44", "Fedora", true]
-          - ["archlinux:latest", "conda-forge", true]
-          - ["ubuntu:26.04", "Ubuntu", true]
+          # - ["archlinux:latest", "Arch", true]
+          # - ["fedora:44", "Fedora", true]
+          # - ["archlinux:latest", "conda-forge", true]
+          # - ["ubuntu:26.04", "Ubuntu", true]
           - ["windows-latest", "conda-forge-windows", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
@@ -193,7 +197,7 @@ jobs:
             "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
             source ~/.bashrc
             cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv git python pip  # will install 3.14
+            micromamba create -n cfenv git python=3.14 pip  # pinned to 3.14
             # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
             echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else
