@@ -109,6 +109,7 @@ jobs:
           else
             source venv/bin/activate
           fi
+          env | sort
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
