@@ -221,7 +221,7 @@ jobs:
           # Build time patches
           test -d "${CONDA_PREFIX:-x}/Library" && export CMAKE_PREFIX_PATH="$CONDA_PREFIX/Library"
           case ${{ matrix.pkgdata[0] }} in
-            openssl)
+            cryptography)
               test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
             ;;
             matplotlib)
