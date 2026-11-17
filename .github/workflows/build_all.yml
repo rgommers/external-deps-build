@@ -98,7 +98,7 @@ jobs:
       - name: Build from sdist
         run: |
           # Dependencies may be installed from wheels, the target package from sdist
-          test -n "$CONDA_PREFIX" && export OPENSSL_DIR="$CONDA_PREFIX"
+          test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
           python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Import installed package
