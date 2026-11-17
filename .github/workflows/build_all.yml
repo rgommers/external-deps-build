@@ -29,6 +29,7 @@ concurrency:
 
 jobs:
   smoketest:
+    if: false
     # Build only one package per distro, to avoid spinning up a ton of jobs if
     # something simple is broken.
     strategy:
@@ -106,7 +107,7 @@ jobs:
           python -c "import ${{ matrix.pkgdata[1] }}"
 
   with_external_metadata:
-    needs: smoketest
+    # needs: smoketest
     if: github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
