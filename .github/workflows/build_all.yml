@@ -225,9 +225,13 @@ jobs:
               test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
             ;;
             grpcio|grpcio-tools)
+              if [[ "$RUNNER_OS" == "Windows" ]]; then
+                # grpcio has veeery long paths; RUNNER_TEMP is shorter
+                export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
               # Upstream bug with their spawn() patches; setuptools no longer uses spawn()
               echo "setuptools<84" > "$RUNNER_TEMP/build-constraints.txt"
               export PIP_BUILD_CONSTRAINT="$RUNNER_TEMP/build-constraints.txt"
+              fi
             ;;
             matplotlib)
               export AR="${GCC_AR:gcc-ar}"
