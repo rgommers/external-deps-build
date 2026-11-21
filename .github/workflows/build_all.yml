@@ -227,6 +227,9 @@ jobs:
             matplotlib)
               export AR="${GCC_AR:gcc-ar}"
             ;;
+            pynacl)
+              export SODIUM_INSTALL=system
+            ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
