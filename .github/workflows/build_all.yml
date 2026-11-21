@@ -222,22 +222,29 @@ jobs:
           test -d "${CONDA_PREFIX:-x}/Library" && export CMAKE_PREFIX_PATH="$CONDA_PREFIX/Library"
           case ${{ matrix.pkgdata[0] }} in
             cryptography)
-              test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
+              test "$RUNNER_OS" == "Windows" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
             ;;
             grpcio|grpcio-tools)
               if [[ "$RUNNER_OS" == "Windows" ]]; then
                 # grpcio has veeery long paths; RUNNER_TEMP is shorter
                 export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
-              # Upstream bug with their spawn() patches; setuptools no longer uses spawn()
-              echo "setuptools<84" > "$RUNNER_TEMP/build-constraints.txt"
-              export PIP_BUILD_CONSTRAINT="$RUNNER_TEMP/build-constraints.txt"
+                # Upstream bug with their spawn() patches; setuptools no longer uses spawn()
+                echo "setuptools<84" > "$RUNNER_TEMP/build-constraints.txt"
+                export PIP_BUILD_CONSTRAINT="$RUNNER_TEMP/build-constraints.txt"
               fi
             ;;
             matplotlib)
-              export AR="${GCC_AR:gcc-ar}"
+              test "$RUNNER_OS" == "Linux" && export AR="${GCC_AR:gcc-ar}"
+              test "$RUNNER_OS" == "Windows" && export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:generic/patch": "m2-patch"}'
+            ;;
+            protobuf)
+              test "$RUNNER_OS" == "Windows" && export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:virtual/compiler/c": "clang"}'
             ;;
             pynacl)
               export SODIUM_INSTALL=system
+            ;;
+            scipy)
+              export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:virtual/interface/blas": "openblas"}'
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
