@@ -3,3 +3,6 @@ build-requires = [
   "dep:virtual/compiler/c",
   "dep:generic/make",
 ]
+host-requires = [
+  "dep:generic/libsodium",
+]

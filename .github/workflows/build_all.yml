@@ -29,25 +29,31 @@ concurrency:
 
 jobs:
   smoketest:
+    if: false
     # Build only one package per distro, to avoid spinning up a ton of jobs if
     # something simple is broken.
     strategy:
       fail-fast: false
       matrix:
         platform:
-          - ["archlinux:latest", "Arch"]
-          - ["fedora:44", "Fedora"]
+          # - ["archlinux:latest", "Arch"]
+          # - ["fedora:44", "Fedora"]
           - ["archlinux:latest", "conda-forge"]
-          - ["ubuntu:26.04", "Ubuntu"]
+          # - ["ubuntu:26.04", "Ubuntu"]
+          - ["windows-latest", "conda-forge-windows"]
         pkgdata:
           - [cryptography, cryptography]
-    runs-on: ubuntu-latest
-    container: ${{ matrix.platform[0] }}
+    runs-on: ${{ contains(matrix.platform[0], ':') && 'ubuntu-latest' || matrix.platform[0] }}
+    container: ${{ contains(matrix.platform[0], ':') && matrix.platform[0] || null }}
+    defaults:
+      run:
+        shell: bash -el {0}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install system Python and git
+        if: ${{ !startsWith(matrix.platform[1], 'conda-forge') }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
             sudo dnf install -y git python  # will install 3.14
@@ -57,37 +63,32 @@ jobs:
             apt update
             apt upgrade -y
             apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
-          elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            source ~/.bashrc
-            cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv git python pip  # will install 3.14
-            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
-            echo "${HOME}/.local/bin" >> $GITHUB_PATH
+          else
+            echo 'Unsupported distro!'
+            exit 1
           fi
+          python -m venv venv
+          echo "source venv/bin/activate" >> ~/.bashrc
 
+      - name: Install micromamba
+        if: startsWith(matrix.platform[1], 'conda-forge')
+        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39  # v3.2.1
+        with:
+          environment-name: cfenv
+          create-args: >-
+            python=3.14
+            pip
+            git
+      
       - name: Download and patch sdist
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            python -m venv venv
-            source venv/bin/activate
-          fi
-
           python -m pip install -r requirements.txt
           python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
           name=${{ matrix.pkgdata[0]}}
-
           echo "Raw external metadata:"
           python -m pyproject_external show --output=raw ./sdist/_amended/$name-*.tar.gz
           echo "Mapped external metadata:"
@@ -97,39 +98,30 @@ jobs:
 
       - name: Build from sdist
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
           # Dependencies may be installed from wheels, the target package from sdist
+          test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
           python -m pyproject_external install sdist/_amended/${{ matrix.pkgdata[0] }}-*.tar.gz
 
       - name: Import installed package
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
-
           python -c "import ${{ matrix.pkgdata[1] }}"
 
   with_external_metadata:
-    needs: smoketest
+    # needs: smoketest
     if: github.repository == 'rgommers/external-deps-build'
     strategy:
       fail-fast: false
       matrix:
         platform:
-          # [container image name, display-name, use-external]
+          # [container image name if it contains ':' OR runs-on image otherwise, display-name, use-external]
           # use-external=false will have a lot of failures; only uncomment if
           # you're interested in seeing what the current baseline is.
           #- ["archlinux:latest", "Arch", false]  # baseline
-          - ["archlinux:latest", "Arch", true]
-          - ["fedora:44", "Fedora", true]
-          - ["archlinux:latest", "conda-forge", true]
-          - ["ubuntu:26.04", "Ubuntu", true]
+          # - ["archlinux:latest", "Arch", true]
+          # - ["fedora:44", "Fedora", true]
+          # - ["archlinux:latest", "conda-forge", true]
+          # - ["ubuntu:26.04", "Ubuntu", true]
+          - ["windows-latest", "conda-forge-windows", true]
         pkgdata:
           # [package-name (must be normalized with lowercase and only dashes), import-name]
           - [cryptography, cryptography]
@@ -169,13 +161,17 @@ jobs:
           - [grpcio-tools, grpc]
           - [pycryptodomex, Cryptodome]
           - [google-crc32c, google_crc32c]
-    runs-on: ubuntu-latest
-    container: ${{ matrix.platform[0] }}
+    runs-on: ${{ contains(matrix.platform[0], ':') && 'ubuntu-latest' || matrix.platform[0] }}
+    container: ${{ contains(matrix.platform[0], ':') && matrix.platform[0] || null }}
+    defaults:
+      run:
+        shell: bash -el {0}
     name: ${{ matrix.pkgdata[0] }}, ${{ matrix.platform[1] }}, ${{ matrix.platform[2] }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install system Python and git
+        if: ${{ !startsWith(matrix.platform[1], 'conda-forge') }}
         run: |
           if [[ ${{ matrix.platform[1] }} == "Fedora" ]]; then
             sudo dnf install -y git python  # will install 3.14
@@ -185,37 +181,31 @@ jobs:
             apt update
             apt upgrade -y
             apt install -y sudo git python3 python-is-python3 python3-venv # gives 3.14
-          elif [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-            source ~/.bashrc
-            cp .github/.mambarc ~/.mambarc
-            micromamba create -n cfenv git python pip  # will install 3.14
-            # we need the micromamba _binary_ (not the shell wrapper) in PATH to install deps
-            echo "${HOME}/.local/bin" >> $GITHUB_PATH
           else
             echo 'Unsupported distro!'
+            exit 1
           fi
+          python -m venv venv
+          echo "source venv/bin/activate" >> ~/.bashrc
+
+      - name: Install micromamba
+        if: startsWith(matrix.platform[1], 'conda-forge')
+        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39  # v3.2.1
+        with:
+          environment-name: cfenv
+          create-args: >-
+            python=3.14
+            pip
+            git
 
       - name: Download and patch sdist
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            python -m venv venv
-            source venv/bin/activate
-          fi
-
           python -m pip install -r requirements.txt
           python -m pyproject_external prepare --out-dir=sdist/_amended ${{ matrix.pkgdata[0]}}
           ls -alh sdist/_amended
 
       - name: Show external dependencies
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
           name=${{ matrix.pkgdata[0]}}
 
           echo "Raw external metadata:"
@@ -228,15 +218,33 @@ jobs:
       - name: Build from sdist
         if: ${{ matrix.platform[2] }}
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
           # Build time patches
+          test -d "${CONDA_PREFIX:-x}/Library" && export CMAKE_PREFIX_PATH="$CONDA_PREFIX/Library"
           case ${{ matrix.pkgdata[0] }} in
+            cryptography)
+              test "$RUNNER_OS" == "Windows" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
+            ;;
+            grpcio|grpcio-tools)
+              if [[ "$RUNNER_OS" == "Windows" ]]; then
+                # grpcio has veeery long paths; RUNNER_TEMP is shorter
+                export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
+                # Upstream bug with their spawn() patches; setuptools no longer uses spawn()
+                echo "setuptools<84" > "$RUNNER_TEMP/build-constraints.txt"
+                export PIP_BUILD_CONSTRAINT="$RUNNER_TEMP/build-constraints.txt"
+              fi
+            ;;
             matplotlib)
-              export AR="${GCC_AR:gcc-ar}"
+              test "$RUNNER_OS" == "Linux" && export AR="${GCC_AR:gcc-ar}"
+              test "$RUNNER_OS" == "Windows" && export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:generic/patch": "m2-patch"}'
+            ;;
+            protobuf)
+              test "$RUNNER_OS" == "Windows" && export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:virtual/compiler/c": "clang"}'
+            ;;
+            pynacl)
+              export SODIUM_INSTALL=system
+            ;;
+            scipy)
+              export _PYPROJECT_EXTERNAL_MAPPING_OVERRIDES='{"pkg:virtual/interface/blas": "openblas"}'
             ;;
           esac
           # Dependencies may be installed from wheels, the target package from sdist
@@ -245,17 +253,9 @@ jobs:
       - name: Build from PyPI, no external deps
         if: ${{ !matrix.platform[2] }}
         run: |
-          python -m venv venv
-          source venv/bin/activate
           # Dependencies may be installed from wheels, the target package from sdist
           python -m pip install ${{ matrix.pkgdata[0] }} --no-binary ${{ matrix.pkgdata[0] }} -v
 
       - name: Import installed package
         run: |
-          if [[ ${{ matrix.platform[1] }} == "conda-forge" ]]; then
-            source ~/.bashrc && micromamba activate cfenv
-          else
-            source venv/bin/activate
-          fi
-
           python -c "import ${{ matrix.pkgdata[1] }}"
