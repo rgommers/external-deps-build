@@ -224,6 +224,11 @@ jobs:
             cryptography)
               test -d "${CONDA_PREFIX:-x}/Library" && export OPENSSL_DIR="$CONDA_PREFIX/Library"
             ;;
+            grpcio|grpcio-tools)
+              # Upstream bug with their spawn() patches; setuptools no longer uses spawn()
+              echo "setuptools<84" > "$RUNNER_TEMP/build-constraints.txt"
+              export PIP_BUILD_CONSTRAINT="$RUNNER_TEMP/build-constraints.txt"
+            ;;
             matplotlib)
               export AR="${GCC_AR:gcc-ar}"
             ;;
